@@ -1,6 +1,6 @@
-package com.predictionTooling.predicitonTooling.controller;
+package com.predictionTooling.predictionTooling.controller;
 
-import com.predictionTooling.predicitonTooling.service.DataRouterService;
+import com.predictionTooling.predictionTooling.service.DataRouterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

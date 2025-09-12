@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.predictionTooling</groupId>
-	<artifactId>predicitonTooling</artifactId>
+	<artifactId>predictionTooling</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>predicitonTooling</name>
+	<name>predictionTooling</name>
 	<description>arbitrage tooling idea</description>
 	<url/>
 	<licenses>

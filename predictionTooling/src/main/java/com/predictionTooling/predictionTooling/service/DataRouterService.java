@@ -1,6 +1,6 @@
-package com.predictionTooling.predicitonTooling.service;
+package com.predictionTooling.predictionTooling.service;
 
-import com.predictionTooling.predicitonTooling.provider.MarketProvider;
+import com.predictionTooling.predictionTooling.provider.MarketProvider;
 
 import org.springframework.stereotype.Service;
 

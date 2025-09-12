@@ -1,8 +1,8 @@
-package com.predictionTooling.predicitonTooling.provider;
+package com.predictionTooling.predictionTooling.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.predictionTooling.predicitonTooling.dto.*;
+import com.predictionTooling.predictionTooling.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

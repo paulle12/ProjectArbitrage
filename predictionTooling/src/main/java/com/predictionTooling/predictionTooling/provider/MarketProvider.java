@@ -1,4 +1,4 @@
-package com.predictionTooling.predicitonTooling.provider;
+package com.predictionTooling.predictionTooling.provider;
 
 import java.util.Map;
 

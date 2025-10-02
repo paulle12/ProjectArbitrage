@@ -1,4 +1,4 @@
-package com.predictionTooling.predictionTooling.dto;
+package com.predictionTooling.predictionTooling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

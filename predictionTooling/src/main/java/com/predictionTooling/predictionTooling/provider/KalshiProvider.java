@@ -74,7 +74,6 @@ public class KalshiProvider implements MarketProvider {
 
         // ---------- 2) For each series, collect ALL open markets ----------
         List<Market> collected = new ArrayList<>();
-        for (Series s : seriesList) {
             String cursor = null;
             do {
                 final String cursorParam = cursor;
@@ -82,7 +81,7 @@ public class KalshiProvider implements MarketProvider {
                     ResponseEntity<String> entity = client.get()
                             .uri(u -> {
                                 UriBuilder b = u.path("/markets")
-                                        .queryParam("series_ticker", s.ticker())
+                                        .queryParam("series_ticker", "KXNFLGAME")
                                         .queryParam("status", "open");
                                 if (cursorParam != null && !cursorParam.isBlank()) {
                                     b = b.queryParam("cursor", cursorParam);
@@ -113,7 +112,7 @@ public class KalshiProvider implements MarketProvider {
                     cursor = null;
                 }
             } while (cursor != null);
-        }
+
 
         // ---------- 3) Optional team filter ----------
         if (team != null && !team.isBlank()) {

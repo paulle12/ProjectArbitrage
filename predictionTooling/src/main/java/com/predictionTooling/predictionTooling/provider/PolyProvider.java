@@ -4,26 +4,43 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Pattern;
 
 @Component
 public class PolyProvider implements MarketProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolyProvider.class.getName());
 
     private final RestClient client;
     private final ObjectMapper mapper = new ObjectMapper();
+    private final String startDate = Instant.now()
+            .minus(7, ChronoUnit.DAYS)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+            .format(DateTimeFormatter.ISO_LOCAL_DATE);
 
     // Regex to match "Team A vs Team B" format (NFL binary style)
-    private static final Pattern VS_PATTERN = Pattern.compile("^[A-Za-z\\s]+ vs [A-Za-z\\s]+$");
+    private static final Pattern VS_PATTERN = Pattern.compile("^[A-Za-z0-9 .]+\\s+vs\\.?\\s+[A-Za-z0-9 .]+$", Pattern.CASE_INSENSITIVE);
 
-    public PolyProvider(@Value("${poly.base-url:https://gamma-api.polymarket.com}") String baseUrl) {
-        this.client = RestClient.builder().baseUrl(baseUrl).build();
+
+
+    //poly,base-url: is used if its being pulled from a config if there is no config it defaults to the given url
+    //public PolyProvider(@Value("${poly.base-url:https://gamma-api.polymarket.com}") String baseUrl) {
+    public PolyProvider() {
+        this.client = RestClient.builder().baseUrl("https://gamma-api.polymarket.com").build();
     }
 
     @Override
@@ -38,21 +55,22 @@ public class PolyProvider implements MarketProvider {
         }
 
         try {
-            //todo add some &start_date_min=2025-09-24T00:00:00Z like this
-            //introduce limits and pagination
+            int limit = 100;
+            int tagId = 450;// NFL events
             ResponseEntity<String> response = client.get()
-                    .uri("/events?tag_id=450&limit=1")  // fixed endpoint for NFL events
-                    .header("User-Agent", "prediction-tool/1.0")
+                    .uri("/events?tag_id=" + tagId + "&limit=" + limit + "&start_date_min=" + startDate)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toEntity(String.class);
-System.out.println(response);
+
+            LOGGER.info(String.valueOf(response));
 
             if (isJson(response) && response.getBody() != null) {
                 JsonNode root = mapper.readTree(response.getBody());
 
                 if (!root.isArray()) {
                     // handle gracefully
+                    LOGGER.error("root is not an array");
                     return "{\"series\":[],\"markets\":[]}";
                 }
 
@@ -61,15 +79,18 @@ System.out.println(response);
 
                 for (JsonNode event : events) {
                     String title = event.path("title").asText("");
-//                    if (!isNFLBinaryTitle(title)) continue;
+                    if (isNFLBinaryFormat(title)) continue;
 
                     JsonNode markets = event.path("markets");
                     if (!markets.isArray()) continue;
 
                     for (JsonNode market : markets) {
+                        String question = market.path("question").asText("");
+                        if (isNFLBinaryFormat(question)) continue;
 
                         ObjectNode out = mapper.createObjectNode();
                         out.put("title", title);
+                        out.put("question", question);
                         out.put("market_id", market.path("id").asText());
                         out.put("slug", event.path("slug").asText());
                         out.put("status", event.path("status").asText());
@@ -99,8 +120,6 @@ System.out.println(response);
             }
 
 
-
-
         } catch (Exception e) {
             System.out.println("[PolyProvider] Error fetching NFL markets: " + e.getMessage());
         }
@@ -108,10 +127,12 @@ System.out.println(response);
         return "{\"series\":[],\"markets\":[]}";
     }
 
-    // Check for "Team A vs Team B" title format
-    private static boolean isNFLBinaryTitle(String title) {
-        return title != null && VS_PATTERN.matcher(title.trim()).matches();
+    // Check for "Team A vs Team B" string format
+    private static boolean isNFLBinaryFormat(String s) {
+        return s == null || !VS_PATTERN.matcher(s.trim()).matches();
     }
+
+
 
     private static boolean isJson(ResponseEntity<?> entity) {
         var ct = entity.getHeaders().getContentType();

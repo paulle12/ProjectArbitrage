@@ -1,0 +1,35 @@
+package com.predictionTooling.predictionTooling.controller;
+
+
+import com.predictionTooling.predictionTooling.provider.PolyProvider;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+/*
+* Not needed but useful if we would like a cleaner routing and debugging but the data controller can handle the route
+* */
+@RestController
+@RequestMapping("/poly")
+public class PolyController {
+
+    private final PolyProvider polyProvider;
+
+    public PolyController(PolyProvider polyProvider) {
+        this.polyProvider = polyProvider;
+    }
+
+    @GetMapping("/nfl")
+    public ResponseEntity<String> getNFLMarkets(@RequestParam Map<String, String> query) {
+        try {
+            String data = polyProvider.fetchPreset("nfl_markets", query);
+            return ResponseEntity.ok(data);
+        } catch (IllegalArgumentException iae) {
+            return ResponseEntity.badRequest().body("{\"error\":\"" + iae.getMessage().replace("\"", "\\\"") + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("{\"error\":\"" + e.getMessage().replace("\"", "\\\"") + "\"}");
+        }
+    }
+}

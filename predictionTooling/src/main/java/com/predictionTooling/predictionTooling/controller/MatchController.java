@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/matches")
 public class MatchController {
@@ -17,8 +16,15 @@ public class MatchController {
         this.matchService = matchService;
     }
 
-    @GetMapping("/matched")
-    public List<MatchedGames> getMatchedMarkets() {
+    @GetMapping("/mock_matched")
+    public List<MatchedGames> getMockedMatchedMarkets() {
         return matchService.getStaticMatches();
     }
+
+    @GetMapping("/matched")
+    public List<MatchedGames> getMatchedMarkets() {
+        return matchService.findMatchingMarkets(List.of(),List.of());
+    }
+
 }
+

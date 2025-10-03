@@ -1,7 +1,8 @@
 package com.predictionTooling.predictionTooling.service;
 
-import com.predictionTooling.predictionTooling.model.MatchResult;
 import com.predictionTooling.predictionTooling.model.MatchedGames;
+import com.predictionTooling.predictionTooling.provider.KalshiProvider;
+import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.stereotype.Service;
 import com.predictionTooling.predictionTooling.model.Market;
 
@@ -12,8 +13,12 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+
 @Service
 public class MatchService {
+    private final KalshiProvider kalshiClient;
+    private final PolyProvider polyClient;
+
     private static final Map<String, String> cityToTeam = Map.ofEntries(
             Map.entry("arizona", "cardinals"),
             Map.entry("atlanta", "falcons"),
@@ -60,6 +65,11 @@ public class MatchService {
     private static final List<String> TEAM_KEYS_BY_LENGTH = teamToCity.keySet().stream()
             .sorted((a, b) -> Integer.compare(b.length(), a.length()))
             .collect(Collectors.toList());
+
+    public MatchService(KalshiProvider kalshiClient, PolyProvider polyClient) {
+        this.kalshiClient = kalshiClient;
+        this.polyClient = polyClient;
+    }
 
     private Set<String> extractTeamsFromTitle(String title, boolean isCityBased) {
         // keep digits; collapse punctuation to spaces; lowercase
@@ -135,6 +145,18 @@ public class MatchService {
                         "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"));
 
         return findMatchingMarkets(kalshiMarkets, polymarkets);
+    }
+
+    public String foo(){
+        List<Market> kalshiRes = kalshiClient.fetchNFL();
+        List<Market> polyRes = polyClient.fetchNFL();
+
+        System.out.println("Kalsi= " + kalshiRes);
+        System.out.println("Poly= " + polyRes);
+
+
+      return findMatchingMarkets(kalshiRes, polyRes).toString();
+
     }
 
 }

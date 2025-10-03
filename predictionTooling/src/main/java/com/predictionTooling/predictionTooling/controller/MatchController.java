@@ -1,29 +1,24 @@
 package com.predictionTooling.predictionTooling.controller;
-
 import com.predictionTooling.predictionTooling.service.MatchService;
+import com.predictionTooling.predictionTooling.model.MatchedGames;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-    @RestController
-    @RequestMapping("/matches")
-    public class MatchController {
+import java.util.List;
 
-        private final MatchService matchService;
+@RestController
+@RequestMapping("/matches")
+public class MatchController {
 
-        @Autowired
-        public MatchController(MatchService matchService) {
-            this.matchService = matchService;
-        }
+    private final MatchService matchService;
 
-        // Example: /matches/didWin?team=Arsenal
-        @GetMapping("/didWin")
-        public String didWin(@RequestParam String team) {
-            return matchService.didTeamWin(team);
-        }
-
-        // Example: /matches/didBeat?teamA=Arsenal&teamB=Chelsea
-        @GetMapping("/didBeat")
-        public String didBeat(@RequestParam String teamA, @RequestParam String teamB) {
-            return matchService.didTeamBeat(teamA, teamB);
-        }
+    @Autowired
+    public MatchController(MatchService matchService) {
+        this.matchService = matchService;
     }
+
+    @GetMapping("/matched")
+    public List<MatchedGames> getMatchedMarkets() {
+        return matchService.getStaticMatches();
+    }
+}

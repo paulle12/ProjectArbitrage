@@ -1,49 +1,140 @@
 package com.predictionTooling.predictionTooling.service;
 
-
 import com.predictionTooling.predictionTooling.model.MatchResult;
+import com.predictionTooling.predictionTooling.model.MatchedGames;
 import org.springframework.stereotype.Service;
+import com.predictionTooling.predictionTooling.model.Market;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
+    private static final Map<String, String> cityToTeam = Map.ofEntries(
+            Map.entry("arizona", "cardinals"),
+            Map.entry("atlanta", "falcons"),
+            Map.entry("baltimore", "ravens"),
+            Map.entry("buffalo", "bills"),
+            Map.entry("carolina", "panthers"),
+            Map.entry("chicago", "bears"),
+            Map.entry("cincinnati", "bengals"),
+            Map.entry("cleveland", "browns"),
+            Map.entry("dallas", "cowboys"),
+            Map.entry("denver", "broncos"),
+            Map.entry("detroit", "lions"),
+            Map.entry("green bay", "packers"),
+            Map.entry("houston", "texans"),
+            Map.entry("indianapolis", "colts"),
+            Map.entry("jacksonville", "jaguars"),
+            Map.entry("kansas city", "chiefs"),
+            Map.entry("las vegas", "raiders"),
+            Map.entry("los angeles", "rams"), // or chargers, see note below
+            Map.entry("los angeles chargers", "chargers"), // explicitly add this too
+            Map.entry("miami", "dolphins"),
+            Map.entry("minnesota", "vikings"),
+            Map.entry("new england", "patriots"),
+            Map.entry("new orleans", "saints"),
+            Map.entry("new york giants", "giants"),
+            Map.entry("new york jets", "jets"),
+            Map.entry("philadelphia", "eagles"),
+            Map.entry("pittsburgh", "steelers"),
+            Map.entry("san francisco", "49ers"),
+            Map.entry("seattle", "seahawks"),
+            Map.entry("tampa bay", "buccaneers"),
+            Map.entry("tennessee", "titans"),
+            Map.entry("washington", "commanders"));
 
-    private final List<MatchResult> matches = List.of(
-            new MatchResult("Arsenal", "Chelsea", 2, 1),
-            new MatchResult("Barcelona", "Real Madrid", 0, 2),
-            new MatchResult("QWER", "ASDF", 3, 3)
-    );
+    private static final Map<String, String> teamToCity = cityToTeam.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-    public String didTeamWin(String team) {
-        for (MatchResult match : matches) {
-            if (match.involvesTeam(team)) {
-                String winner = match.getWinner();
-                if (winner.equalsIgnoreCase(team)) {
-                    return "Yes, " + team + " won. Match: " + match;
-                } else if (winner.equals("Draw")) {
-                    return "No, it was a draw. Match: " + match;
-                } else {
-                    return "No, " + winner + " won. Match: " + match;
+    // do some sorting to help regex can remove this once i figure out duplicate
+    // city teams
+    private static final List<String> CITY_KEYS_BY_LENGTH = cityToTeam.keySet().stream()
+            .sorted((a, b) -> Integer.compare(b.length(), a.length()))
+            .collect(Collectors.toList());
+
+    private static final List<String> TEAM_KEYS_BY_LENGTH = teamToCity.keySet().stream()
+            .sorted((a, b) -> Integer.compare(b.length(), a.length()))
+            .collect(Collectors.toList());
+
+    private Set<String> extractTeamsFromTitle(String title, boolean isCityBased) {
+        // keep digits; collapse punctuation to spaces; lowercase
+        String cleaned = title.toLowerCase().replaceAll("[^a-z0-9]+", " ");
+
+        Set<String> result = new HashSet<>();
+        if (isCityBased) {
+            for (String city : CITY_KEYS_BY_LENGTH) {
+                if (cleaned.matches(".*\\b" + java.util.regex.Pattern.quote(city) + "\\b.*")) {
+                    result.add(cityToTeam.get(city));
+                }
+            }
+        } else {
+            for (String team : TEAM_KEYS_BY_LENGTH) {
+                if (cleaned.matches(".*\\b" + java.util.regex.Pattern.quote(team) + "\\b.*")) {
+                    result.add(team); // already a team name
                 }
             }
         }
-        return "No match found for " + team;
+        return result;
     }
 
-    public String didTeamBeat(String teamA, String teamB) {
-        for (MatchResult match : matches) {
-            if (match.isMatchBetween(teamA, teamB)) {
-                String winner = match.getWinner();
-                if (winner.equalsIgnoreCase(teamA)) {
-                    return "Yes, " + teamA + " beat " + teamB + ". Match: " + match;
-                } else if (winner.equalsIgnoreCase(teamB)) {
-                    return "No, " + teamB + " won. Match: " + match;
-                } else {
-                    return "No, it was a draw between " + teamA + " and " + teamB + ". Match: " + match;
+    public List<MatchedGames> findMatchingMarkets(List<Market> kalshiMarkets, List<Market> polymarkets) {
+        List<MatchedGames> matches = new ArrayList<>();
+
+        for (Market kalshi : kalshiMarkets) {
+            Set<String> kalshiTeams = extractTeamsFromTitle(kalshi.title(), true);
+
+            // Skip if we didn't confidently find exactly two teams
+            if (kalshiTeams.size() != 2)
+                continue;
+
+            for (Market poly : polymarkets) {
+                Set<String> polyTeams = extractTeamsFromTitle(poly.title(), false);
+                if (polyTeams.size() != 2)
+                    continue;
+
+                if (kalshiTeams.equals(polyTeams)) {
+                    matches.add(new MatchedGames(kalshi, poly));
                 }
             }
         }
-        return "No match found between " + teamA + " and " + teamB;
+
+        return matches;
     }
+
+    // Dummy test method that returns static matched markets
+    public List<MatchedGames> getStaticMatches() {
+        // todo these are mostly just dummy data will need to account for cities with 2
+        // teams
+        List<Market> kalshiMarkets = List.of(
+                new Market("asdf", "event_tick", "minnesota at cleveland winning?", "subtitle", "category", "status",
+                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
+                        "noaskdollar"),
+                new Market("asdf", "event_tick", "kansas city at green bay winning?", "subtitle", "category", "status",
+                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
+                        "noaskdollar"),
+                new Market("asdf", "event_tick", "los angeles at dallas winning?", "subtitle", "category", "status",
+                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
+                        "noaskdollar"),
+                new Market("asdf", "event_tick", "san francisco at las vegas winning?", "subtitle", "category",
+                        "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
+                        "noaskdollar"));
+
+        List<Market> polymarkets = List.of(
+                new Market("asdf", "event_tick", "vikings vs browns", "subtitle", "category", "status", "open_time",
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "chiefs vs packers", "subtitle", "category", "status", "open_time",
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "chargers vs cowboys", "subtitle", "category", "status", "open_time",
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "49ers vs raiders", "subtitle", "category", "status", "open_time",
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"));
+
+        return findMatchingMarkets(kalshiMarkets, polymarkets);
+    }
+
 }

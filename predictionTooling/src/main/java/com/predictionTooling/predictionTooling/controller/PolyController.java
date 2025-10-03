@@ -1,10 +1,12 @@
 package com.predictionTooling.predictionTooling.controller;
 
 
+import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -23,8 +25,8 @@ public class PolyController {
     @GetMapping("/nfl")
     public ResponseEntity<String> getNFLMarkets(@RequestParam Map<String, String> query) {
         try {
-            String data = polyProvider.fetchPreset("nfl_markets", query);
-            return ResponseEntity.ok(data);
+            List<Market> data = polyProvider.fetchNFL();
+            return ResponseEntity.ok(data.toString());
         } catch (IllegalArgumentException iae) {
             return ResponseEntity.badRequest().body("{\"error\":\"" + iae.getMessage().replace("\"", "\\\"") + "\"}");
         } catch (Exception e) {

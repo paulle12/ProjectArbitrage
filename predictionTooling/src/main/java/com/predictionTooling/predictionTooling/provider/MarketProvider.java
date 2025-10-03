@@ -1,13 +1,13 @@
 package com.predictionTooling.predictionTooling.provider;
 
-import java.util.Map;
+import com.predictionTooling.predictionTooling.model.Market;
+
+import java.util.List;
 
 public interface MarketProvider {
-    /** Path key, e.g. "kalshi". */
-    String key();
 
     /** Optional presets (returns JSON). */
-    default String fetchPreset(String preset, Map<String, String> query) {
-        throw new UnsupportedOperationException("Preset not supported for: " + key());
+    default List<Market> fetchNFL() {
+        throw new UnsupportedOperationException("NFLClient fail");
     }
 }

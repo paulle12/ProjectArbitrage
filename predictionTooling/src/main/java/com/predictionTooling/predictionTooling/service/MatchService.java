@@ -36,7 +36,6 @@ public class MatchService {
             Map.entry("las vegas", "raiders"),
             Map.entry("los angeles", "rams"), // or chargers, see note below
             Map.entry("los angeles chargers", "chargers"), // explicitly add this too
-            Map.entry("los angeles rams", "rams"),
             Map.entry("miami", "dolphins"),
             Map.entry("minnesota", "vikings"),
             Map.entry("new england", "patriots"),
@@ -86,6 +85,25 @@ public class MatchService {
         }
 
         return matches;
+    }
+
+    // Dummy test method that returns static matched markets
+    public List<MatchedGames> getStaticMatches() {
+        List<Market> kalshiMarkets = List.of(
+                new Market("asdf", "event_tick", "minnesota at cleveland winning?", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "kansas city at green bay winning?", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "los angeles at dallas winning?", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "san francisco at las vegas winning?", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar")
+        );
+
+        List<Market> polymarkets = List.of(
+                new Market("asdf", "event_tick", "vikings vs browns", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "chiefs vs packers", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "chargers vs cowboys", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                new Market("asdf", "event_tick", "49ers vs raiders", "subtitle", "category", "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar")
+        );
+
+        return findMatchingMarkets(kalshiMarkets, polymarkets);
     }
 
 }

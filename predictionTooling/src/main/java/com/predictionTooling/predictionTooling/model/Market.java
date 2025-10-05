@@ -19,5 +19,8 @@ public record Market(
         Integer no_bid,
         String no_bid_dollars,
         Integer no_ask,
-        String no_ask_dollars) {
+        String no_ask_dollars,
+        Boolean is_arbitrage,
+        Double arbitrage_amount
+) {
 }

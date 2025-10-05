@@ -5,6 +5,7 @@ import com.predictionTooling.predictionTooling.provider.KalshiProvider;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.stereotype.Service;
 import com.predictionTooling.predictionTooling.model.Market;
+import com.predictionTooling.predictionTooling.util.ArbitrageCalculator;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class MatchService {
     private final KalshiProvider kalshiClient;
     private final PolyProvider polyClient;
+    private  ArbitrageCalculator arbitrageCalculator;
 
     private static final Map<String, String> cityToTeam = Map.ofEntries(
             Map.entry("arizona", "cardinals"),
@@ -66,9 +68,10 @@ public class MatchService {
             .sorted((a, b) -> Integer.compare(b.length(), a.length()))
             .toList();
 
-    public MatchService(KalshiProvider kalshiClient, PolyProvider polyClient) {
+    public MatchService(KalshiProvider kalshiClient, PolyProvider polyClient, ArbitrageCalculator arbitrageCalculator) {
         this.kalshiClient = kalshiClient;
         this.polyClient = polyClient;
+        this.arbitrageCalculator = arbitrageCalculator;
     }
 
     private Set<String> extractTeamsFromTitle(String title, boolean isCityBased) {
@@ -121,26 +124,26 @@ public class MatchService {
         List<Market> kalshiMarkets = List.of(
                 new Market("asdf", "event_tick", "minnesota at cleveland winning?", "subtitle", "category", "status",
                         "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar"),
+                        "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "kansas city at green bay winning?", "subtitle", "category", "status",
                         "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar"),
+                        "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "los angeles at dallas winning?", "subtitle", "category", "status",
                         "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar"),
+                        "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "san francisco at las vegas winning?", "subtitle", "category",
                         "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar"));
+                        "noaskdollar",false,0.0));
 
         List<Market> polymarkets = List.of(
                 new Market("asdf", "event_tick", "vikings vs browns", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "chiefs vs packers", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "chargers vs cowboys", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"),
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar",false,0.0),
                 new Market("asdf", "event_tick", "49ers vs raiders", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar"));
+                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar",false,0.0));
 
         return findMatchingMarkets(kalshiMarkets, polymarkets);
     }
@@ -153,6 +156,14 @@ public class MatchService {
         System.out.println("Poly= " + polyRes);
 
         return findMatchingMarkets(kalshiRes, polyRes);
+    }
+
+    public List<MatchedGame> getArbitrage() {
+        List<Market> kalshiRes = kalshiClient.fetchNFL();
+        List<Market> polyRes = polyClient.fetchNFL();
+        List<MatchedGame> matchingMarkets = findMatchingMarkets(kalshiRes, polyRes);
+
+        return arbitrageCalculator.calculateArbitrage(matchingMarkets);
     }
 
 }

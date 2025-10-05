@@ -1,8 +1,10 @@
 package com.predictionTooling.predictionTooling.controller;
 
+import com.predictionTooling.predictionTooling.model.MatchedGame;
 import com.predictionTooling.predictionTooling.service.MatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/data")
@@ -14,8 +16,8 @@ public class ArbitrageController {
     }
 
     @GetMapping("/test")
-    public ResponseEntity<String> getMarkets() {
-        return ResponseEntity.ok(matchService.foo());
+    public ResponseEntity<List<MatchedGame>> getMarkets() {
+        return ResponseEntity.ok(matchService.getMatchedGames());
 
     }
 }

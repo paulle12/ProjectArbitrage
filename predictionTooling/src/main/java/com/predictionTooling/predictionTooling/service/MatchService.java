@@ -1,6 +1,6 @@
 package com.predictionTooling.predictionTooling.service;
 
-import com.predictionTooling.predictionTooling.model.MatchedGames;
+import com.predictionTooling.predictionTooling.model.MatchedGame;
 import com.predictionTooling.predictionTooling.provider.KalshiProvider;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.stereotype.Service;
@@ -60,11 +60,11 @@ public class MatchService {
     // city teams
     private static final List<String> CITY_KEYS_BY_LENGTH = cityToTeam.keySet().stream()
             .sorted((a, b) -> Integer.compare(b.length(), a.length()))
-            .collect(Collectors.toList());
+            .toList();
 
     private static final List<String> TEAM_KEYS_BY_LENGTH = teamToCity.keySet().stream()
             .sorted((a, b) -> Integer.compare(b.length(), a.length()))
-            .collect(Collectors.toList());
+            .toList();
 
     public MatchService(KalshiProvider kalshiClient, PolyProvider polyClient) {
         this.kalshiClient = kalshiClient;
@@ -92,23 +92,21 @@ public class MatchService {
         return result;
     }
 
-    public List<MatchedGames> findMatchingMarkets(List<Market> kalshiMarkets, List<Market> polymarkets) {
-        List<MatchedGames> matches = new ArrayList<>();
+    public List<MatchedGame> findMatchingMarkets(List<Market> kalshiMarkets, List<Market> polymarkets) {
+        List<MatchedGame> matches = new ArrayList<>();
 
         for (Market kalshi : kalshiMarkets) {
             Set<String> kalshiTeams = extractTeamsFromTitle(kalshi.title(), true);
 
             // Skip if we didn't confidently find exactly two teams
-            if (kalshiTeams.size() != 2)
-                continue;
+            if (kalshiTeams.size() != 2) continue;
 
             for (Market poly : polymarkets) {
                 Set<String> polyTeams = extractTeamsFromTitle(poly.title(), false);
-                if (polyTeams.size() != 2)
-                    continue;
+                if (polyTeams.size() != 2) continue;
 
                 if (kalshiTeams.equals(polyTeams)) {
-                    matches.add(new MatchedGames(kalshi, poly));
+                    matches.add(new MatchedGame(kalshi, poly));
                 }
             }
         }
@@ -117,7 +115,7 @@ public class MatchService {
     }
 
     // Dummy test method that returns static matched markets
-    public List<MatchedGames> getStaticMatches() {
+    public List<MatchedGame> getStaticMatches() {
         // todo these are mostly just dummy data will need to account for cities with 2
         // teams
         List<Market> kalshiMarkets = List.of(
@@ -147,16 +145,14 @@ public class MatchService {
         return findMatchingMarkets(kalshiMarkets, polymarkets);
     }
 
-    public String foo(){
+    public List<MatchedGame> getMatchedGames() {
         List<Market> kalshiRes = kalshiClient.fetchNFL();
         List<Market> polyRes = polyClient.fetchNFL();
 
-        System.out.println("Kalsi= " + kalshiRes);
+        System.out.println("Kalshi= " + kalshiRes);
         System.out.println("Poly= " + polyRes);
 
-
-      return findMatchingMarkets(kalshiRes, polyRes).toString();
-
+        return findMatchingMarkets(kalshiRes, polyRes);
     }
 
 }

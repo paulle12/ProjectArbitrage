@@ -29,7 +29,7 @@ public class PolyProvider implements MarketProvider {
     private final RestClient client;
     private final ObjectMapper mapper = new ObjectMapper();
     private final String startDate = Instant.now()
-            .minus(7, ChronoUnit.DAYS)
+            .minus(2, ChronoUnit.DAYS)
             .atZone(ZoneOffset.UTC)
             .toLocalDate()
             .format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -88,10 +88,19 @@ public class PolyProvider implements MarketProvider {
                         String openTime = market.path("startDate").asText(); // Adjust if needed
                         String closeTime = market.path("endDate").asText();
 
-                        JsonNode outcomes = market.path("outcomes");
-                        Integer yesBid = null, yesAsk = null, noBid = null, noAsk = null;
-                        String yesBidDollars = null, yesAskDollars = null, noBidDollars = null, noAskDollars = null;
 
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String outcomePrices =  market.path("outcomePrices").asText();
+                        List<String> values = objectMapper.readValue(outcomePrices, List.class);
+
+                        String yesBidDollars = values.get(0);
+                        String noBidDollars =  values.get(1);
+
+
+                        Integer yesBid = null, yesAsk = null, noBid = null, noAsk = null;
+                        String yesAskDollars = null, noAskDollars = null;
+                        boolean isArbitrage = false;
+                        double arbitrageAmount = 0.0;
 
                         result.add(new Market(
                                 marketId,         // ticker
@@ -109,7 +118,9 @@ public class PolyProvider implements MarketProvider {
                                 noBid,
                                 noBidDollars,
                                 noAsk,
-                                noAskDollars
+                                noAskDollars,
+                                isArbitrage,
+                                arbitrageAmount
                         ));
                     }
                 }

@@ -18,6 +18,10 @@ public class ArbitrageController {
     @GetMapping("/test")
     public ResponseEntity<List<MatchedGame>> getMarkets() {
         return ResponseEntity.ok(matchService.getMatchedGames());
+    }
 
+    @GetMapping("/getArbitrage")
+    public ResponseEntity<List<MatchedGame>> getMarketsWithArbitrage() {
+        return ResponseEntity.ok(matchService.getArbitrage());
     }
 }

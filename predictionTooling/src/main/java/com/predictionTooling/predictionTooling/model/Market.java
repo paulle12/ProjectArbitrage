@@ -1,6 +1,7 @@
 package com.predictionTooling.predictionTooling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.math.BigDecimal;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Market(
@@ -21,6 +22,6 @@ public record Market(
         Integer no_ask,
         String no_ask_dollars,
         Boolean is_arbitrage,
-        Double arbitrage_amount
+        BigDecimal arbitrage_amount
 ) {
 }

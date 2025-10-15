@@ -1,6 +1,7 @@
 package com.predictionTooling.predictionTooling.model;
 
 import lombok.Builder;
+import java.math.BigDecimal;
 
 @Builder
 public class MarketBuilderAdapter {
@@ -21,7 +22,7 @@ public class MarketBuilderAdapter {
     private Integer no_ask;
     private String no_ask_dollars;
     private Boolean is_arbitrage;
-    private Double arbitrage_amount;
+    private BigDecimal arbitrage_amount;
 
     public Market toRecord() {
         return new Market(

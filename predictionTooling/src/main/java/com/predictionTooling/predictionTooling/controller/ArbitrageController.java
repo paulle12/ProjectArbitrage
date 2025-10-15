@@ -1,5 +1,6 @@
 package com.predictionTooling.predictionTooling.controller;
 
+import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.model.MatchedGame;
 import com.predictionTooling.predictionTooling.service.MatchService;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,10 @@ public class ArbitrageController {
     @GetMapping("/getArbitrage")
     public ResponseEntity<List<MatchedGame>> getMarketsWithArbitrage() {
         return ResponseEntity.ok(matchService.getArbitrage());
+    }
+
+    @GetMapping("/getSingleMarketArbitrage")
+    public ResponseEntity<List<Market>> getSingleMarketsWithArbitrage() {
+        return ResponseEntity.ok(matchService.getSingleMarketArbitrage());
     }
 }

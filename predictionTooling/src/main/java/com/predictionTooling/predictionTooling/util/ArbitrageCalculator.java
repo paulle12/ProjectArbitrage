@@ -5,6 +5,8 @@ import com.predictionTooling.predictionTooling.model.MarketBuilderAdapter;
 import com.predictionTooling.predictionTooling.model.MatchedGame;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +18,13 @@ public class ArbitrageCalculator {
         for (MatchedGame games : matchedGames) {
             Market kalshi = games.kalshiMarket();
             Market polymarket = games.polymarket();
+            BigDecimal threshold = new BigDecimal("0.1");
+            BigDecimal arbitragePercentage = BigDecimal.ONE
+                    .subtract(new BigDecimal(kalshi.yes_bid_dollars()).add(new BigDecimal(polymarket.no_bid_dollars())))
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(4, RoundingMode.HALF_UP);
 
-            //TODO: fix this to input the correct decimal odds for team a and b
-            double arbitragePercentage =
-                    (1 - (Double.parseDouble(kalshi.yes_bid_dollars()) + Double.parseDouble(polymarket.no_bid_dollars()))) * 100;
-            //TODO: decide which one of these percentages is the correct one for the calculation
-            double arbitragePercentageInverse =
-                    (1 - (Double.parseDouble(kalshi.no_bid_dollars()) + Double.parseDouble(polymarket.yes_bid_dollars()))) * 100;
-
-            boolean isArbitrage = arbitragePercentage >= 0.1;
+            boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
 
             Market updatedKalshi = MarketBuilderAdapter.builder()
                     .ticker(kalshi.ticker())
@@ -74,5 +74,44 @@ public class ArbitrageCalculator {
         }
 
         return updatedMatchedGames;
+    }
+
+    public List<Market> calculateGameArbitrage(List<Market> games) {
+        List<Market> updatedGames = new ArrayList<>();
+
+        for (Market game : games) {
+            BigDecimal threshold = new BigDecimal("0.1");
+            BigDecimal arbitragePercentage = BigDecimal.ONE
+                    .subtract(new BigDecimal(game.yes_bid_dollars()).add(new BigDecimal(game.no_bid_dollars())))
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(4, RoundingMode.HALF_UP);
+
+            boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
+
+            Market updatedKalshi = MarketBuilderAdapter.builder()
+                    .ticker(game.ticker())
+                    .event_ticker(game.event_ticker())
+                    .title(game.title())
+                    .subtitle(game.subtitle())
+                    .category(game.category())
+                    .status(game.status())
+                    .open_time(game.open_time())
+                    .close_time(game.close_time())
+                    .yes_bid(game.yes_bid())
+                    .yes_bid_dollars(game.yes_bid_dollars())
+                    .yes_ask(game.yes_ask())
+                    .yes_ask_dollars(game.yes_ask_dollars())
+                    .no_bid(game.no_bid())
+                    .no_bid_dollars(game.no_bid_dollars())
+                    .no_ask(game.no_ask())
+                    .no_ask_dollars(game.no_ask_dollars())
+                    .is_arbitrage(isArbitrage)
+                    .arbitrage_amount(arbitragePercentage)
+                    .build()
+                    .toRecord();
+
+            updatedGames.add(updatedKalshi);
+        }
+        return updatedGames;
     }
 }

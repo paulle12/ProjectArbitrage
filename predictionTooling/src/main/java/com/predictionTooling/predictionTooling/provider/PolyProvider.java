@@ -3,19 +3,18 @@ package com.predictionTooling.predictionTooling.provider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.predictionTooling.predictionTooling.model.Market;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ public class PolyProvider implements MarketProvider {
     private final RestClient client;
     private final ObjectMapper mapper = new ObjectMapper();
     private final String startDate = Instant.now()
-            .minus(2, ChronoUnit.DAYS)
+            .minus(7, ChronoUnit.DAYS)
             .atZone(ZoneOffset.UTC)
             .toLocalDate()
             .format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -100,7 +99,7 @@ public class PolyProvider implements MarketProvider {
                         Integer yesBid = null, yesAsk = null, noBid = null, noAsk = null;
                         String yesAskDollars = null, noAskDollars = null;
                         boolean isArbitrage = false;
-                        double arbitrageAmount = 0.0;
+                        BigDecimal arbitrageAmount =new BigDecimal("0.0");
 
                         result.add(new Market(
                                 marketId,         // ticker

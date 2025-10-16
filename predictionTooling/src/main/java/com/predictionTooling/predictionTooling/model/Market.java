@@ -11,6 +11,6 @@ public record Market(
                 String status,
                 String open_time,
                 String close_time,
-                String yes_bid_dollars,
-                String no_bid_dollars) {
+                String yes_ask_dollars,
+                String no_ask_dollars) {
 }

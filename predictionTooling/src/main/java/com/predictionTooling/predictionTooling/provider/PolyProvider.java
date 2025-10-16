@@ -94,8 +94,10 @@ public class PolyProvider implements MarketProvider {
                         String outcomePrices = market.path("outcomePrices").asText();
                         List<String> values = objectMapper.readValue(outcomePrices, List.class);
 
-                        String yesBidDollars = values.get(0);
-                        String noBidDollars = values.get(1);
+                        // aggregate values not pulled from CLOB will update later in
+                        // https://github.com/paulle12/ProjectArbitrage/issues/14 wont be for a while
+                        String yesAskDollars = values.get(0);
+                        String noAskDollars = values.get(1);
 
                         result.add(new Market(
                                 marketId, // ticker
@@ -105,8 +107,8 @@ public class PolyProvider implements MarketProvider {
                                 marketStatus,
                                 openTime,
                                 closeTime,
-                                yesBidDollars,
-                                noBidDollars));
+                                yesAskDollars,
+                                noAskDollars));
                     }
                 }
 

@@ -22,8 +22,8 @@ public class ArbitrageCalculator {
                         Market polymarket = games.polymarket();
                         BigDecimal threshold = new BigDecimal("0.1");
                         BigDecimal arbitragePercentage = BigDecimal.ONE
-                                        .subtract(new BigDecimal(kalshi.yes_bid_dollars())
-                                                        .add(new BigDecimal(polymarket.no_bid_dollars())))
+                                        .subtract(new BigDecimal(kalshi.yes_ask_dollars())
+                                                        .add(new BigDecimal(polymarket.no_ask_dollars())))
                                         .multiply(BigDecimal.valueOf(100))
                                         .setScale(4, RoundingMode.HALF_UP);
 
@@ -37,8 +37,8 @@ public class ArbitrageCalculator {
                                         .status(kalshi.status())
                                         .open_time(kalshi.open_time())
                                         .close_time(kalshi.close_time())
-                                        .yes_bid_dollars(kalshi.yes_bid_dollars())
-                                        .no_bid_dollars(kalshi.no_bid_dollars())
+                                        .yes_bid_dollars(kalshi.yes_ask_dollars())
+                                        .no_bid_dollars(kalshi.no_ask_dollars())
                                         .build()
                                         .toRecord();
 
@@ -50,8 +50,8 @@ public class ArbitrageCalculator {
                                         .status(polymarket.status())
                                         .open_time(polymarket.open_time())
                                         .close_time(polymarket.close_time())
-                                        .yes_bid_dollars(polymarket.yes_bid_dollars())
-                                        .no_bid_dollars(polymarket.no_bid_dollars())
+                                        .yes_bid_dollars(polymarket.yes_ask_dollars())
+                                        .no_bid_dollars(polymarket.no_ask_dollars())
                                         .build()
                                         .toRecord();
 
@@ -68,8 +68,8 @@ public class ArbitrageCalculator {
                 for (Market game : games) {
                         BigDecimal threshold = new BigDecimal("0.1");
                         BigDecimal arbitragePercentage = BigDecimal.ONE
-                                        .subtract(new BigDecimal(game.yes_bid_dollars())
-                                                        .add(new BigDecimal(game.no_bid_dollars())))
+                                        .subtract(new BigDecimal(game.yes_ask_dollars())
+                                                        .add(new BigDecimal(game.no_ask_dollars())))
                                         .multiply(BigDecimal.valueOf(100))
                                         .setScale(4, RoundingMode.HALF_UP);
 
@@ -83,8 +83,8 @@ public class ArbitrageCalculator {
                                         .status(game.status())
                                         .open_time(game.open_time())
                                         .close_time(game.close_time())
-                                        .yes_bid_dollars(game.yes_bid_dollars())
-                                        .no_bid_dollars(game.no_bid_dollars())
+                                        .yes_bid_dollars(game.yes_ask_dollars())
+                                        .no_bid_dollars(game.no_ask_dollars())
                                         .build()
                                         .toRecord();
 

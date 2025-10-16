@@ -1,7 +1,7 @@
 package com.predictionTooling.predictionTooling.controller;
 
-import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.model.MatchedGame;
+import com.predictionTooling.predictionTooling.model.SingularArbitrage;
 import com.predictionTooling.predictionTooling.service.MatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +16,7 @@ public class ArbitrageController {
         this.matchService = matchService;
     }
 
+    // TODO: probably needs to be replaced with issue 18
     @GetMapping("/test")
     public ResponseEntity<List<MatchedGame>> getMarkets() {
         return ResponseEntity.ok(matchService.getMatchedGames());
@@ -27,7 +28,7 @@ public class ArbitrageController {
     }
 
     @GetMapping("/getSingleMarketArbitrage")
-    public ResponseEntity<List<Market>> getSingleMarketsWithArbitrage() {
+    public ResponseEntity<List<SingularArbitrage>> getSingleMarketsWithArbitrage() {
         return ResponseEntity.ok(matchService.getSingleMarketArbitrage());
     }
 }

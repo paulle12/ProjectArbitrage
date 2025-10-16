@@ -1,6 +1,7 @@
 package com.predictionTooling.predictionTooling.service;
 
 import com.predictionTooling.predictionTooling.model.MatchedGame;
+import com.predictionTooling.predictionTooling.model.SingularArbitrage;
 import com.predictionTooling.predictionTooling.provider.KalshiProvider;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
 
 @Service
 public class MatchService {
@@ -40,14 +40,14 @@ public class MatchService {
             Map.entry("jacksonville", "jaguars"),
             Map.entry("kansas city", "chiefs"),
             Map.entry("las vegas", "raiders"),
-            Map.entry("los angeles", "rams"), // or chargers, see note below
-            Map.entry("los angeles chargers", "chargers"), // explicitly add this too
+            Map.entry("los angeles r", "rams"),
+            Map.entry("los angeles c", "chargers"),
             Map.entry("miami", "dolphins"),
             Map.entry("minnesota", "vikings"),
             Map.entry("new england", "patriots"),
             Map.entry("new orleans", "saints"),
-            Map.entry("new york giants", "giants"),
-            Map.entry("new york jets", "jets"),
+            Map.entry("new york g", "giants"),
+            Map.entry("new york j", "jets"),
             Map.entry("philadelphia", "eagles"),
             Map.entry("pittsburgh", "steelers"),
             Map.entry("san francisco", "49ers"),
@@ -103,14 +103,16 @@ public class MatchService {
             Set<String> kalshiTeams = extractTeamsFromTitle(kalshi.title(), true);
 
             // Skip if we didn't confidently find exactly two teams
-            if (kalshiTeams.size() != 2) continue;
+            if (kalshiTeams.size() != 2)
+                continue;
 
             for (Market poly : polymarkets) {
                 Set<String> polyTeams = extractTeamsFromTitle(poly.title(), false);
-                if (polyTeams.size() != 2) continue;
+                if (polyTeams.size() != 2)
+                    continue;
 
                 if (kalshiTeams.equals(polyTeams)) {
-                    matches.add(new MatchedGame(kalshi, poly));
+                    matches.add(new MatchedGame(kalshi, poly, false, new BigDecimal("0.0")));
                 }
             }
         }
@@ -123,28 +125,24 @@ public class MatchService {
         // todo these are mostly just dummy data will need to account for cities with 2
         // teams
         List<Market> kalshiMarkets = List.of(
-                new Market("asdf", "event_tick", "minnesota at cleveland winning?", "subtitle", "category", "status",
-                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "kansas city at green bay winning?", "subtitle", "category", "status",
-                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "los angeles at dallas winning?", "subtitle", "category", "status",
-                        "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "san francisco at las vegas winning?", "subtitle", "category",
-                        "status", "open_time", "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4,
-                        "noaskdollar", false, new BigDecimal("0.0")));
+                new Market("asdf", "event_tick", "minnesota at cleveland winning?", "category", "status",
+                        "open_time", "close_time", "1", "4"),
+                new Market("asdf", "event_tick", "kansas city at green bay winning?", "category", "status",
+                        "open_time", "close_time", "3", "4"),
+                new Market("asdf", "event_tick", "los angeles at dallas winning?", "category", "status",
+                        "open_time", "close_time", "4", "4"),
+                new Market("asdf", "event_tick", "san francisco at las vegas winning?", "category",
+                        "status", "open_time", "close_time", "1", "3"));
 
         List<Market> polymarkets = List.of(
-                new Market("asdf", "event_tick", "vikings vs browns", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "chiefs vs packers", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "chargers vs cowboys", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar", false, new BigDecimal("0.0")),
-                new Market("asdf", "event_tick", "49ers vs raiders", "subtitle", "category", "status", "open_time",
-                        "close_time", 1, "yesbiddollar", 3, "yesaskdollar", 4, "nobiddollars", 4, "noaskdollar", false, new BigDecimal("0.0")));
+                new Market("asdf", "event_tick", "vikings vs browns", "category", "status", "open_time",
+                        "close_time", "3", "4"),
+                new Market("asdf", "event_tick", "chiefs vs packers", "category", "status", "open_time",
+                        "close_time", "1", "3"),
+                new Market("asdf", "event_tick", "chargers vs cowboys", "category", "status", "open_time",
+                        "close_time", "13", "4"),
+                new Market("asdf", "event_tick", "49ers vs raiders", "category", "status", "open_time",
+                        "close_time", "3", "4"));
 
         return findMatchingMarkets(kalshiMarkets, polymarkets);
     }
@@ -152,9 +150,6 @@ public class MatchService {
     public List<MatchedGame> getMatchedGames() {
         List<Market> kalshiRes = kalshiClient.fetchNFL();
         List<Market> polyRes = polyClient.fetchNFL();
-
-        System.out.println("Kalshi= " + kalshiRes);
-        System.out.println("Poly= " + polyRes);
 
         return findMatchingMarkets(kalshiRes, polyRes);
     }
@@ -167,7 +162,7 @@ public class MatchService {
         return arbitrageCalculator.calculateArbitrage(matchingMarkets);
     }
 
-    public List<Market> getSingleMarketArbitrage() {
+    public List<SingularArbitrage> getSingleMarketArbitrage() {
         List<Market> kalshiRes = kalshiClient.fetchNFL();
 
         return arbitrageCalculator.calculateGameArbitrage(kalshiRes);

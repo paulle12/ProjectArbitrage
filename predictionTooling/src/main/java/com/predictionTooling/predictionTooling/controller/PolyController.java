@@ -1,6 +1,5 @@
 package com.predictionTooling.predictionTooling.controller;
 
-
 import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +21,8 @@ public class PolyController {
         this.polyProvider = polyProvider;
     }
 
+    // TODO: not sure how much we want to do with this maybe can be resolved as
+    // issue 18 for when we want to test responses
     @GetMapping("/nfl")
     public ResponseEntity<String> getNFLMarkets(@RequestParam Map<String, String> query) {
         try {

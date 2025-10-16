@@ -2,6 +2,6 @@ package com.predictionTooling.predictionTooling.model;
 
 import java.math.BigDecimal;
 
-public record MatchedGame(Market kalshiMarket, Market polymarket, Boolean is_arbitrage,
+public record SingularArbitrage(Market kalshiMarket, Boolean is_arbitrage,
         BigDecimal arbitrage_amount) {
 }

@@ -14,82 +14,122 @@ import java.util.List;
 
 @Component
 public class ArbitrageCalculator {
-        public List<MatchedGame> calculateArbitrage(List<MatchedGame> matchedGames) {
-                List<MatchedGame> updatedMatchedGames = new ArrayList<>();
+    public List<MatchedGame> calculateArbitrage(List<MatchedGame> matchedGames) {
+        List<MatchedGame> updatedMatchedGames = new ArrayList<>();
 
-                for (MatchedGame games : matchedGames) {
-                        Market kalshi = games.kalshiMarket();
-                        Market polymarket = games.polymarket();
-                        BigDecimal threshold = new BigDecimal("0.1");
-                        BigDecimal arbitragePercentage = BigDecimal.ONE
-                                        .subtract(new BigDecimal(kalshi.yes_ask_dollars())
-                                                        .add(new BigDecimal(polymarket.no_ask_dollars())))
-                                        .multiply(BigDecimal.valueOf(100))
-                                        .setScale(4, RoundingMode.HALF_UP);
+        for (MatchedGame games : matchedGames) {
+            Market kalshi = games.kalshiMarket();
+            Market polymarket = games.polymarket();
+            BigDecimal threshold = new BigDecimal("0.1");
+            BigDecimal yesAskDollar = new BigDecimal(kalshi.yesAskDollars());
+            BigDecimal noAskDollar = new BigDecimal(polymarket.noAskDollars());
 
-                        boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
+            BigDecimal arbitragePercentage = BigDecimal.ONE
+                    .subtract(yesAskDollar)
+                    .add(noAskDollar)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(4, RoundingMode.HALF_UP);
+            int yesOdds = convertToAmericanOdds(yesAskDollar);
+            int noOdds = convertToAmericanOdds(noAskDollar);
 
-                        Market updatedKalshi = MarketBuilderAdapter.builder()
-                                        .ticker(kalshi.ticker())
-                                        .event_ticker(kalshi.event_ticker())
-                                        .title(kalshi.title())
-                                        .category(kalshi.category())
-                                        .status(kalshi.status())
-                                        .open_time(kalshi.open_time())
-                                        .close_time(kalshi.close_time())
-                                        .yes_bid_dollars(kalshi.yes_ask_dollars())
-                                        .no_bid_dollars(kalshi.no_ask_dollars())
-                                        .build()
-                                        .toRecord();
+            boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
 
-                        Market updatedPoly = MarketBuilderAdapter.builder()
-                                        .ticker(polymarket.ticker())
-                                        .event_ticker(polymarket.event_ticker())
-                                        .title(polymarket.title())
-                                        .category(polymarket.category())
-                                        .status(polymarket.status())
-                                        .open_time(polymarket.open_time())
-                                        .close_time(polymarket.close_time())
-                                        .yes_bid_dollars(polymarket.yes_ask_dollars())
-                                        .no_bid_dollars(polymarket.no_ask_dollars())
-                                        .build()
-                                        .toRecord();
+            Market updatedKalshi = MarketBuilderAdapter.builder()
+                    .ticker(kalshi.ticker())
+                    .eventTicker(kalshi.eventTicker())
+                    .title(kalshi.title())
+                    .category(kalshi.category())
+                    .status(kalshi.status())
+                    .openTime(kalshi.openTime())
+                    .closeTime(kalshi.closeTime())
+                    .yesAskDollars(kalshi.yesAskDollars())
+                    .noAskDollars(kalshi.noAskDollars())
+                    .americanYesOdds(formatOdds(yesOdds))
+                    .americanNoOdds(formatOdds(noOdds))
+                    .build()
+                    .toRecord();
 
-                        updatedMatchedGames.add(
-                                        new MatchedGame(updatedKalshi, updatedPoly, isArbitrage, arbitragePercentage));
-                }
+            Market updatedPoly = MarketBuilderAdapter.builder()
+                    .ticker(polymarket.ticker())
+                    .eventTicker(polymarket.eventTicker())
+                    .title(polymarket.title())
+                    .category(polymarket.category())
+                    .status(polymarket.status())
+                    .openTime(polymarket.openTime())
+                    .closeTime(polymarket.closeTime())
+                    .yesAskDollars(polymarket.yesAskDollars())
+                    .noAskDollars(polymarket.noAskDollars())
+                    .americanYesOdds(formatOdds(yesOdds))
+                    .americanNoOdds(formatOdds(noOdds))
+                    .build()
+                    .toRecord();
 
-                return updatedMatchedGames;
+            updatedMatchedGames.add(
+                    new MatchedGame(updatedKalshi, updatedPoly, isArbitrage, arbitragePercentage));
         }
 
-        public List<SingularArbitrage> calculateGameArbitrage(List<Market> games) {
-                List<SingularArbitrage> updatedGames = new ArrayList<>();
+        return updatedMatchedGames;
+    }
 
-                for (Market game : games) {
-                        BigDecimal threshold = new BigDecimal("0.1");
-                        BigDecimal arbitragePercentage = BigDecimal.ONE
-                                        .subtract(new BigDecimal(game.yes_ask_dollars())
-                                                        .add(new BigDecimal(game.no_ask_dollars())))
-                                        .multiply(BigDecimal.valueOf(100))
-                                        .setScale(4, RoundingMode.HALF_UP);
+    public List<SingularArbitrage> calculateGameArbitrage(List<Market> games) {
+        List<SingularArbitrage> updatedGames = new ArrayList<>();
 
-                        boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
+        for (Market game : games) {
+            BigDecimal threshold = new BigDecimal("0.1");
+            BigDecimal yesAskDollar = new BigDecimal(game.yesAskDollars());
+            BigDecimal noAskDollar = new BigDecimal(game.noAskDollars());
 
-                        Market updatedKalshi = MarketBuilderAdapter.builder()
-                                        .ticker(game.ticker())
-                                        .event_ticker(game.event_ticker())
-                                        .title(game.title())
-                                        .category(game.category())
-                                        .status(game.status())
-                                        .open_time(game.open_time())
-                                        .close_time(game.close_time())
-                                        .yes_bid_dollars(game.yes_ask_dollars())
-                                        .no_bid_dollars(game.no_ask_dollars())
-                                        .build()
-                                        .toRecord();
+            BigDecimal arbitragePercentage = BigDecimal.ONE
+                    .subtract(yesAskDollar)
+                    .add(noAskDollar)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(4, RoundingMode.HALF_UP);
 
-                        updatedGames.add(new SingularArbitrage(updatedKalshi, isArbitrage, arbitragePercentage));
-                }
-                return updatedGames;
+            int yesOdds = convertToAmericanOdds(yesAskDollar);
+            int noOdds = convertToAmericanOdds(noAskDollar);
+
+            boolean isArbitrage = arbitragePercentage.compareTo(threshold) >= 0;
+
+            Market updatedKalshi = MarketBuilderAdapter.builder()
+                    .ticker(game.ticker())
+                    .eventTicker(game.eventTicker())
+                    .title(game.title())
+                    .category(game.category())
+                    .status(game.status())
+                    .openTime(game.openTime())
+                    .closeTime(game.closeTime())
+                    .yesAskDollars(game.yesAskDollars())
+                    .noAskDollars(game.noAskDollars())
+                    .americanYesOdds(formatOdds(yesOdds))
+                    .americanNoOdds(formatOdds(noOdds))
+                    .build()
+                    .toRecord();
+
+            updatedGames.add(new SingularArbitrage(updatedKalshi, isArbitrage, arbitragePercentage));
         }
+        return updatedGames;
+    }
+
+
+    public int convertToAmericanOdds(BigDecimal price) {
+        BigDecimal one = BigDecimal.ONE;
+        BigDecimal profit = one.subtract(price);
+        BigDecimal risk = price;
+
+        BigDecimal odds;
+
+        if (profit.compareTo(risk) > 0) {
+            // Underdog (positive odds)
+            odds = profit.divide(risk, 10, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+        } else {
+            // Favorite (negative odds)
+            odds = risk.divide(profit, 10, RoundingMode.HALF_UP).multiply(new BigDecimal("-100"));
+        }
+
+        return odds.setScale(0, RoundingMode.HALF_UP).intValue();
+    }
+
+    public String formatOdds(int odds) {
+        return (odds > 0 ? "+" : "") + odds;
+    }
 }

@@ -30,7 +30,7 @@ public class KalshiProvider implements MarketProvider {
         try {
             ResponseEntity<String> entity = client.get()
                     .uri(u -> {
-                        UriBuilder b = u.path("/series/")
+                        UriBuilder b = u.path("/series")
                                 .queryParam("category", "Sports")
                                 .queryParam("tags", "Football");
 

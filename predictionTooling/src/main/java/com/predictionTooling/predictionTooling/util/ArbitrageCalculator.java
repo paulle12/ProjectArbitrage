@@ -111,10 +111,9 @@ public class ArbitrageCalculator {
     }
 
 
-    public int convertToAmericanOdds(BigDecimal price) {
+    public int convertToAmericanOdds(BigDecimal risk) {
         BigDecimal one = BigDecimal.ONE;
-        BigDecimal profit = one.subtract(price);
-        BigDecimal risk = price;
+        BigDecimal profit = one.subtract(risk);
 
         BigDecimal odds;
 

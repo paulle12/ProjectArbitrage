@@ -1,6 +1,8 @@
 package com.predictionTooling.predictionTooling.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.predictionTooling.predictionTooling.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,9 @@ import java.util.*;
 public class KalshiProvider implements MarketProvider {
 
     private final RestClient client;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .build();
 
     public KalshiProvider(@Value("${kalshi.base-url}") String baseUrl) {
         this.client = RestClient.builder().baseUrl(baseUrl).build();

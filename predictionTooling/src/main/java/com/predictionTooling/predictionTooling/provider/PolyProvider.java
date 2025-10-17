@@ -98,17 +98,21 @@ public class PolyProvider implements MarketProvider {
                         // https://github.com/paulle12/ProjectArbitrage/issues/14 wont be for a while
                         String yesAskDollars = values.get(0);
                         String noAskDollars = values.get(1);
+                        String americanYesOdds = "";
+                        String americanNoOdds = "";
 
                         result.add(new Market(
                                 marketId, // ticker
-                                ticker, // event_ticker
+                                ticker, // eventTicker
                                 marketTitle, // title
                                 "NFL", // category
                                 marketStatus,
                                 openTime,
                                 closeTime,
                                 yesAskDollars,
-                                noAskDollars));
+                                noAskDollars,
+                                americanYesOdds,
+                                americanNoOdds));
                     }
                 }
 

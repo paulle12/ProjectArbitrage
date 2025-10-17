@@ -126,23 +126,23 @@ public class MatchService {
         // teams
         List<Market> kalshiMarkets = List.of(
                 new Market("asdf", "event_tick", "minnesota at cleveland winning?", "category", "status",
-                        "open_time", "close_time", "1", "4"),
+                        "openTime", "closeTime", "1", "4","123","-234"),
                 new Market("asdf", "event_tick", "kansas city at green bay winning?", "category", "status",
-                        "open_time", "close_time", "3", "4"),
+                        "openTime", "closeTime", "3", "4","123","-234"),
                 new Market("asdf", "event_tick", "los angeles at dallas winning?", "category", "status",
-                        "open_time", "close_time", "4", "4"),
+                        "openTime", "closeTime", "4", "4","123","-234"),
                 new Market("asdf", "event_tick", "san francisco at las vegas winning?", "category",
-                        "status", "open_time", "close_time", "1", "3"));
+                        "status", "openTime", "closeTime", "1", "3","123","-234"));
 
         List<Market> polymarkets = List.of(
-                new Market("asdf", "event_tick", "vikings vs browns", "category", "status", "open_time",
-                        "close_time", "3", "4"),
-                new Market("asdf", "event_tick", "chiefs vs packers", "category", "status", "open_time",
-                        "close_time", "1", "3"),
-                new Market("asdf", "event_tick", "chargers vs cowboys", "category", "status", "open_time",
-                        "close_time", "13", "4"),
-                new Market("asdf", "event_tick", "49ers vs raiders", "category", "status", "open_time",
-                        "close_time", "3", "4"));
+                new Market("asdf", "event_tick", "vikings vs browns", "category", "status", "openTime",
+                        "closeTime", "3", "4","123","-234"),
+                new Market("asdf", "event_tick", "chiefs vs packers", "category", "status", "openTime",
+                        "closeTime", "1", "3","123","-234"),
+                new Market("asdf", "event_tick", "chargers vs cowboys", "category", "status", "openTime",
+                        "closeTime", "13", "4","123","-234"),
+                new Market("asdf", "event_tick", "49ers vs raiders", "category", "status", "openTime",
+                        "closeTime", "3", "4","123","-234"));
 
         return findMatchingMarkets(kalshiMarkets, polymarkets);
     }

@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Market(
                 String ticker,
-                String event_ticker,
+                String eventTicker,
                 String title,
                 String category,
                 String status,
-                String open_time,
-                String close_time,
-                String yes_ask_dollars,
-                String no_ask_dollars) {
+                String openTime,
+                String closeTime,
+                String yesAskDollars,
+                String noAskDollars,
+                String americanYesOdds,
+                String americanNoOdds) {
 }

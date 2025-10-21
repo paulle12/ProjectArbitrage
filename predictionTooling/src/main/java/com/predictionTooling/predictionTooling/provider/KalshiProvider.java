@@ -109,6 +109,142 @@ public class KalshiProvider implements MarketProvider {
         return collected;
     }
 
+    @Override
+    public List<Market> fetchOrderBook() {
+
+        // ---------- 1) Discover NFL series ----------
+        List<Series> seriesList = List.of();
+        try {
+            ResponseEntity<String> entity = client.get()
+                    .uri(u -> {
+                        UriBuilder b = u.path("/series")
+                                .queryParam("category", "Sports")
+                                .queryParam("tags", "Football");
+
+                        URI built = b.build();
+                        System.out.println("[Kalshi.series] GET " + built);
+                        return built;
+                    })
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .toEntity(String.class);
+
+            System.out.println("[Kalshi.series] status=" + entity.getStatusCode()
+                    + " contentType=" + entity.getHeaders().getContentType());
+            System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
+
+            String raw = entity.getBody();
+            if (raw != null && !raw.isBlank() && isJson(entity)) {
+                SeriesListResponse resp = mapper.readValue(raw, SeriesListResponse.class);
+                seriesList = (resp == null || resp.series() == null) ? List.of() : resp.series();
+            }
+        } catch (Exception e) {
+            System.out.println("[Kalshi.series] Exception: " + e.getMessage());
+        }
+
+        if (seriesList.isEmpty()) {
+            System.out.println("[Kalshi.series] No NFL series found.");
+            return List.of();
+        }
+
+        // ---------- 2) For each series, collect ALL open markets ----------
+        List<Market> collected = new ArrayList<>();
+        String cursor = null;
+        do {
+            final String cursorParam = cursor;
+            try {
+                ResponseEntity<String> entity = client.get()
+                        .uri(u -> {
+                            UriBuilder b = u.path("/markets")
+                                    .queryParam("series_ticker", "KXNFLGAME")
+                                    .queryParam("status", "open");
+                            if (cursorParam != null && !cursorParam.isBlank()) {
+                                b = b.queryParam("cursor", cursorParam);
+                            }
+                            URI built = b.build();
+                            System.out.println("[Kalshi.markets] GET " + built);
+                            return built;
+                        })
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .toEntity(String.class);
+
+                System.out.println("[Kalshi.markets] status=" + entity.getStatusCode()
+                        + " contentType=" + entity.getHeaders().getContentType());
+                System.out.println("[Kalshi.markets] raw body=" + snippet(entity.getBody(), 500));
+
+                if (isJson(entity) && entity.getBody() != null) {
+                    MarketsResponse mr = mapper.readValue(entity.getBody(), MarketsResponse.class);
+                    if (mr != null && mr.markets() != null) {
+                        collected.addAll(mr.markets());
+                    }
+                    cursor = normalizeCursor(mr == null ? null : mr.cursor());
+                } else {
+                    cursor = null;
+                }
+            } catch (Exception e) {
+                System.out.println("[Kalshi.markets] Exception: " + e.getMessage());
+                cursor = null;
+            }
+        } while (cursor != null);
+
+        List<Market> updatedMarkets = new ArrayList<>();
+
+        //we can adjust how many results we get from the order book
+        //its returned in order of price descending and max depth is 100
+        int depth = 100;
+        for (Market market : collected) {
+            try {
+                ResponseEntity<String> entity = client.get()
+                        .uri(u -> {
+                            UriBuilder b = u.path("/markets/")
+                                    .path(market.ticker())
+                                    .path("/orderbook")
+                                    .queryParam("depth", depth);
+                            URI built = b.build();
+                            System.out.println("[Kalshi.series] GET " + built);
+                            return built;
+                        })
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .toEntity(String.class);
+
+                System.out.println("[Kalshi.series] status=" + entity.getStatusCode()
+                        + " contentType=" + entity.getHeaders().getContentType());
+                System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
+
+                String raw = entity.getBody();
+                Orderbook orderbook = null;
+
+                if (raw != null && !raw.isBlank() && isJson(entity)) {
+                    orderbook = mapper.readValue(raw, Orderbook.class);
+                }
+
+                Market updatedMarket = MarketBuilderAdapter
+                        .from(market)
+                        .toBuilder()
+                        .orderbook(orderbook)
+                        .build()
+                        .toRecord();
+
+
+                updatedMarkets.add(updatedMarket);
+
+            } catch (Exception e) {
+                System.out.println("[Kalshi.series] Exception: " + e.getMessage());
+
+                // Optionally add the original market without the orderBookResponse
+                updatedMarkets.add(market);
+            }
+        }
+
+        return updatedMarkets;
+
+        //If we only want to return markets that had a valid OrderBookResponse:
+//        return updatedMarkets.stream()
+//                .filter(m -> m.orderBookResponse() != null)
+//                .toList();
+    }
     // ---------- Helpers ----------
 
     private static boolean isJson(ResponseEntity<?> entity) {

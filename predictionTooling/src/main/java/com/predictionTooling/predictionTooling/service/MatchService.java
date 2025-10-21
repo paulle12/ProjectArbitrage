@@ -125,7 +125,7 @@ public class MatchService {
     public List<MatchedGame> getStaticMatches() {
         // todo these are mostly just dummy data will need to account for cities with 2
         // teams
-        OrderbookResponse orderBookResponse = new OrderbookResponse(new OrderbookResponse.Orderbook(List.of(), List.of(), List.of(), List.of()));
+        OrderbookResponse orderBookResponse = new OrderbookResponse(new OrderbookResponse.Orderbook(List.of(), List.of()));
         List<Market> kalshiMarkets = List.of(
                 new Market("asdf", "event_tick", "minnesota at cleveland winning?", "category", "status",
                         "openTime", "closeTime", "1", "4", "123", "-234", orderBookResponse),

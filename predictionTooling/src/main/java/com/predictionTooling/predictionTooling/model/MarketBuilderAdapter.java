@@ -2,7 +2,7 @@ package com.predictionTooling.predictionTooling.model;
 
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public class MarketBuilderAdapter {
     private String ticker;
     private String eventTicker;
@@ -15,6 +15,7 @@ public class MarketBuilderAdapter {
     private String noAskDollars;
     private String americanYesOdds;
     private String americanNoOdds;
+    private Orderbook orderbook;
 
     public Market toRecord() {
         return new Market(
@@ -28,6 +29,24 @@ public class MarketBuilderAdapter {
                 yesAskDollars,
                 noAskDollars,
                 americanYesOdds,
-                americanNoOdds);
+                americanNoOdds,
+                orderbook);
+    }
+
+    public static MarketBuilderAdapter from(Market market) {
+        return MarketBuilderAdapter.builder()
+                .ticker(market.ticker())
+                .eventTicker(market.eventTicker())
+                .title(market.title())
+                .category(market.category())
+                .status(market.status())
+                .openTime(market.openTime())
+                .closeTime(market.closeTime())
+                .yesAskDollars(market.yesAskDollars())
+                .noAskDollars(market.noAskDollars())
+                .americanYesOdds(market.americanYesOdds())
+                .americanNoOdds(market.americanNoOdds())
+                .orderbook(market.orderbook())
+                .build();
     }
 }

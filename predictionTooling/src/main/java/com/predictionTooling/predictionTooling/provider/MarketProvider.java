@@ -6,8 +6,14 @@ import java.util.List;
 
 public interface MarketProvider {
 
-    /** Optional presets (returns JSON). */
+    /**
+     * Optional presets (returns JSON).
+     */
     default List<Market> fetchNFL() {
         throw new UnsupportedOperationException("NFLClient fail");
+    }
+
+    default List<Market> fetchOrderBook() {
+        throw new UnsupportedOperationException("Order book fetch failed");
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.predictionTooling.predictionTooling.model.Market;
+import com.predictionTooling.predictionTooling.model.Orderbook;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -94,12 +96,15 @@ public class PolyProvider implements MarketProvider {
                         String outcomePrices = market.path("outcomePrices").asText();
                         List<String> values = objectMapper.readValue(outcomePrices, List.class);
 
-                        // aggregate values not pulled from CLOB will update later in
-                        // https://github.com/paulle12/ProjectArbitrage/issues/14 wont be for a while
                         String yesAskDollars = values.get(0);
                         String noAskDollars = values.get(1);
                         String americanYesOdds = "";
                         String americanNoOdds = "";
+                        Orderbook orderbook = new Orderbook(
+                                Collections.emptyList(),
+                                Collections.emptyList(),
+                                Collections.emptyList(),
+                                Collections.emptyList());
 
                         result.add(new Market(
                                 marketId, // ticker
@@ -112,7 +117,8 @@ public class PolyProvider implements MarketProvider {
                                 yesAskDollars,
                                 noAskDollars,
                                 americanYesOdds,
-                                americanNoOdds));
+                                americanNoOdds,
+                                orderbook));
                     }
                 }
 

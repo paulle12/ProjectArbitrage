@@ -31,4 +31,9 @@ public class ArbitrageController {
     public ResponseEntity<List<SingularArbitrage>> getSingleMarketsWithArbitrage() {
         return ResponseEntity.ok(matchService.getSingleMarketArbitrage());
     }
+
+    @GetMapping("/getLiveSingleMarketArbitrage")
+    public ResponseEntity<List<SingularArbitrage>> getLiveSingleMarketsWithArbitrage() {
+        return ResponseEntity.ok(matchService.getLiveSingleMarketArbitrage());
+    }
 }

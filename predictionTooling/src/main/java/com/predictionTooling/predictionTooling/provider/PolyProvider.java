@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.predictionTooling.predictionTooling.model.Market;
-import com.predictionTooling.predictionTooling.model.Orderbook;
+import com.predictionTooling.predictionTooling.model.OrderBookResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -100,11 +100,12 @@ public class PolyProvider implements MarketProvider {
                         String noAskDollars = values.get(1);
                         String americanYesOdds = "";
                         String americanNoOdds = "";
-                        Orderbook orderbook = new Orderbook(
+                        OrderBookResponse orderbook = new OrderBookResponse(
+                                new OrderBookResponse.Orderbook(
                                 Collections.emptyList(),
                                 Collections.emptyList(),
                                 Collections.emptyList(),
-                                Collections.emptyList());
+                                Collections.emptyList()));
 
                         result.add(new Market(
                                 marketId, // ticker

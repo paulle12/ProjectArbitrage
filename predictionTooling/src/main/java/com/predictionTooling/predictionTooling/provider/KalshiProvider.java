@@ -214,16 +214,16 @@ public class KalshiProvider implements MarketProvider {
                 System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
 
                 String raw = entity.getBody();
-                Orderbook orderbook = null;
+                OrderBookResponse orderBookResponse = null;
 
                 if (raw != null && !raw.isBlank() && isJson(entity)) {
-                    orderbook = mapper.readValue(raw, Orderbook.class);
+                    orderBookResponse = mapper.readValue(raw, OrderBookResponse.class);
                 }
 
                 Market updatedMarket = MarketBuilderAdapter
                         .from(market)
                         .toBuilder()
-                        .orderbook(orderbook)
+                        .orderBookResponse(orderBookResponse)
                         .build()
                         .toRecord();
 

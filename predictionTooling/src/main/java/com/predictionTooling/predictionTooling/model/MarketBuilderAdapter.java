@@ -15,7 +15,7 @@ public class MarketBuilderAdapter {
     private String noAskDollars;
     private String americanYesOdds;
     private String americanNoOdds;
-    private OrderbookResponse orderBookResponse;
+    private Orderbook orderBook;
 
     public Market toRecord() {
         return new Market(
@@ -30,7 +30,7 @@ public class MarketBuilderAdapter {
                 noAskDollars,
                 americanYesOdds,
                 americanNoOdds,
-                orderBookResponse);
+                orderBook);
     }
 
     public static MarketBuilderAdapter from(Market market) {
@@ -46,7 +46,7 @@ public class MarketBuilderAdapter {
                 .noAskDollars(market.noAskDollars())
                 .americanYesOdds(market.americanYesOdds())
                 .americanNoOdds(market.americanNoOdds())
-                .orderBookResponse(market.orderBookResponse())
+                .orderBook(market.orderBook())
                 .build();
     }
 }

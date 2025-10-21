@@ -1,5 +1,6 @@
 package com.predictionTooling.predictionTooling.provider;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -87,7 +88,7 @@ public class KalshiProvider implements MarketProvider {
                         .toEntity(String.class);
 
                 System.out.println("[Kalshi.markets] status=" + entity.getStatusCode()
-                        + " contentType=" + entity.getHeaders().getContentType());
+                            + " contentType=" + entity.getHeaders().getContentType());
                 System.out.println("[Kalshi.markets] raw body=" + snippet(entity.getBody(), 500));
 
                 if (isJson(entity) && entity.getBody() != null) {
@@ -214,16 +215,18 @@ public class KalshiProvider implements MarketProvider {
                 System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
 
                 String raw = entity.getBody();
-                OrderbookResponse orderBookResponse = null;
+                Orderbook orderBook = null;
 
                 if (raw != null && !raw.isBlank() && isJson(entity)) {
-                    orderBookResponse = mapper.readValue(raw, OrderbookResponse.class);
+                    JsonNode root = mapper.readTree(raw);
+                    JsonNode orderbookNode = root.get("orderbook");
+                    orderBook = mapper.treeToValue(orderbookNode, Orderbook.class);
                 }
 
                 Market updatedMarket = MarketBuilderAdapter
                         .from(market)
                         .toBuilder()
-                        .orderBookResponse(orderBookResponse)
+                        .orderBook(orderBook)
                         .build()
                         .toRecord();
 
@@ -233,16 +236,16 @@ public class KalshiProvider implements MarketProvider {
             } catch (Exception e) {
                 System.out.println("[Kalshi.series] Exception: " + e.getMessage());
 
-                // Optionally add the original market without the orderBookResponse
+                // Optionally add the original market without the orderBook
                 updatedMarkets.add(market);
             }
         }
 
         return updatedMarkets;
 
-        //If we only want to return markets that had a valid OrderbookResponse:
+        //If we only want to return markets that had a valid Orderbook:
 //        return updatedMarkets.stream()
-//                .filter(m -> m.orderBookResponse() != null)
+//                .filter(m -> m.orderBook() != null)
 //                .toList();
     }
     // ---------- Helpers ----------

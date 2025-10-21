@@ -1,7 +1,7 @@
 package com.predictionTooling.predictionTooling.service;
 
 import com.predictionTooling.predictionTooling.model.MatchedGame;
-import com.predictionTooling.predictionTooling.model.Orderbook;
+import com.predictionTooling.predictionTooling.model.OrderbookResponse;
 import com.predictionTooling.predictionTooling.model.SingularArbitrage;
 import com.predictionTooling.predictionTooling.provider.KalshiProvider;
 import com.predictionTooling.predictionTooling.provider.PolyProvider;
@@ -125,26 +125,26 @@ public class MatchService {
     public List<MatchedGame> getStaticMatches() {
         // todo these are mostly just dummy data will need to account for cities with 2
         // teams
-        Orderbook orderbook = new Orderbook(List.of(), List.of(), List.of(), List.of());
+        OrderbookResponse orderBookResponse = new OrderbookResponse(new OrderbookResponse.Orderbook(List.of(), List.of(), List.of(), List.of()));
         List<Market> kalshiMarkets = List.of(
                 new Market("asdf", "event_tick", "minnesota at cleveland winning?", "category", "status",
-                        "openTime", "closeTime", "1", "4", "123", "-234", orderbook),
+                        "openTime", "closeTime", "1", "4", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "kansas city at green bay winning?", "category", "status",
-                        "openTime", "closeTime", "3", "4", "123", "-234", orderbook),
+                        "openTime", "closeTime", "3", "4", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "los angeles at dallas winning?", "category", "status",
-                        "openTime", "closeTime", "4", "4", "123", "-234", orderbook),
+                        "openTime", "closeTime", "4", "4", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "san francisco at las vegas winning?", "category",
-                        "status", "openTime", "closeTime", "1", "3", "123", "-234", orderbook));
+                        "status", "openTime", "closeTime", "1", "3", "123", "-234", orderBookResponse));
 
         List<Market> polymarkets = List.of(
                 new Market("asdf", "event_tick", "vikings vs browns", "category", "status", "openTime",
-                        "closeTime", "3", "4", "123", "-234", orderbook),
+                        "closeTime", "3", "4", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "chiefs vs packers", "category", "status", "openTime",
-                        "closeTime", "1", "3", "123", "-234", orderbook),
+                        "closeTime", "1", "3", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "chargers vs cowboys", "category", "status", "openTime",
-                        "closeTime", "13", "4", "123", "-234", orderbook),
+                        "closeTime", "13", "4", "123", "-234", orderBookResponse),
                 new Market("asdf", "event_tick", "49ers vs raiders", "category", "status", "openTime",
-                        "closeTime", "3", "4", "123", "-234", orderbook));
+                        "closeTime", "3", "4", "123", "-234", orderBookResponse));
 
         return findMatchingMarkets(kalshiMarkets, polymarkets);
     }

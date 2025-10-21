@@ -15,7 +15,7 @@ public class MarketBuilderAdapter {
     private String noAskDollars;
     private String americanYesOdds;
     private String americanNoOdds;
-    private OrderBookResponse orderBookResponse;
+    private OrderbookResponse orderBookResponse;
 
     public Market toRecord() {
         return new Market(

@@ -15,5 +15,5 @@ public record Market(
         String noAskDollars,
         String americanYesOdds,
         String americanNoOdds,
-        OrderBookResponse orderBookResponse) {
+        OrderbookResponse orderBookResponse) {
 }

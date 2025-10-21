@@ -214,10 +214,10 @@ public class KalshiProvider implements MarketProvider {
                 System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
 
                 String raw = entity.getBody();
-                OrderBookResponse orderBookResponse = null;
+                OrderbookResponse orderBookResponse = null;
 
                 if (raw != null && !raw.isBlank() && isJson(entity)) {
-                    orderBookResponse = mapper.readValue(raw, OrderBookResponse.class);
+                    orderBookResponse = mapper.readValue(raw, OrderbookResponse.class);
                 }
 
                 Market updatedMarket = MarketBuilderAdapter
@@ -240,7 +240,7 @@ public class KalshiProvider implements MarketProvider {
 
         return updatedMarkets;
 
-        //If we only want to return markets that had a valid OrderBookResponse:
+        //If we only want to return markets that had a valid OrderbookResponse:
 //        return updatedMarkets.stream()
 //                .filter(m -> m.orderBookResponse() != null)
 //                .toList();

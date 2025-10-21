@@ -103,9 +103,8 @@ public class PolyProvider implements MarketProvider {
                         OrderbookResponse orderbook = new OrderbookResponse(
                                 new OrderbookResponse.Orderbook(
                                 Collections.emptyList(),
-                                Collections.emptyList(),
-                                Collections.emptyList(),
-                                Collections.emptyList()));
+                                Collections.emptyList()
+                            ));
 
                         result.add(new Market(
                                 marketId, // ticker

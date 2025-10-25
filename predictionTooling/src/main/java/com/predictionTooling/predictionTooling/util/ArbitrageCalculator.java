@@ -41,32 +41,17 @@ public class ArbitrageCalculator {
             int polyYesOdds = convertToAmericanOdds(yesAskPoly);
             int polyNoOdds = convertToAmericanOdds(noAskPoly);
 
-            Market updatedKalshi = MarketBuilderAdapter.builder()
-                    .ticker(kalshi.ticker())
-                    .eventTicker(kalshi.eventTicker())
-                    .title(kalshi.title())
-                    .category(kalshi.category())
-                    .status(kalshi.status())
-                    .openTime(kalshi.openTime())
-                    .closeTime(kalshi.closeTime())
-                    .yesAskDollars(kalshi.yesAskDollars())
-                    .noAskDollars(kalshi.noAskDollars())
+            Market updatedKalshi = MarketBuilderAdapter
+                    .from(kalshi)
+                    .toBuilder()
                     .americanYesOdds(formatOdds(kalshiYesOdds))
                     .americanNoOdds(formatOdds(kalshiNoOdds))
-                    .orderBook(kalshi.orderBook())
                     .build()
                     .toRecord();
 
-            Market updatedPoly = MarketBuilderAdapter.builder()
-                    .ticker(polymarket.ticker())
-                    .eventTicker(polymarket.eventTicker())
-                    .title(polymarket.title())
-                    .category(polymarket.category())
-                    .status(polymarket.status())
-                    .openTime(polymarket.openTime())
-                    .closeTime(polymarket.closeTime())
-                    .yesAskDollars(polymarket.yesAskDollars())
-                    .noAskDollars(polymarket.noAskDollars())
+            Market updatedPoly = MarketBuilderAdapter
+                    .from(polymarket)
+                    .toBuilder()
                     .americanYesOdds(formatOdds(polyYesOdds))
                     .americanNoOdds(formatOdds(polyNoOdds))
                     .build()
@@ -96,19 +81,11 @@ public class ArbitrageCalculator {
             int yesOdds = convertToAmericanOdds(yesAsk);
             int noOdds = convertToAmericanOdds(noAsk);
 
-            Market updatedMarket = MarketBuilderAdapter.builder()
-                    .ticker(game.ticker())
-                    .eventTicker(game.eventTicker())
-                    .title(game.title())
-                    .category(game.category())
-                    .status(game.status())
-                    .openTime(game.openTime())
-                    .closeTime(game.closeTime())
-                    .yesAskDollars(game.yesAskDollars())
-                    .noAskDollars(game.noAskDollars())
+            Market updatedMarket = MarketBuilderAdapter
+                    .from(game)
+                    .toBuilder()
                     .americanYesOdds(formatOdds(yesOdds))
                     .americanNoOdds(formatOdds(noOdds))
-                    .orderBook(game.orderBook())
                     .build()
                     .toRecord();
 

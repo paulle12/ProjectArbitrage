@@ -18,47 +18,50 @@ public class ArbitrageCalculator {
     public List<MatchedGame> calculateArbitrage(List<MatchedGame> matchedGames) {
         List<MatchedGame> updatedMatchedGames = new ArrayList<>();
 
-        for (MatchedGame games : matchedGames) {
-            Market kalshi = games.kalshiMarket();
-            Market polymarket = games.polymarket();
+        for (MatchedGame game : matchedGames) {
+            Market kalshi = game.kalshiMarket();
+            Market polymarket = game.polymarket();
 
-            BigDecimal yesAskKalshi = new BigDecimal(kalshi.yesAskDollars());
-            BigDecimal noAskKalshi = new BigDecimal(kalshi.noAskDollars());
-            BigDecimal yesAskPoly = new BigDecimal(polymarket.yesAskDollars());
-            BigDecimal noAskPoly = new BigDecimal(polymarket.noAskDollars());
+            BigDecimal yesKalshi = new BigDecimal(kalshi.yesAskDollars());
+            BigDecimal noKalshi = new BigDecimal(kalshi.noAskDollars());
+            BigDecimal yesPoly = new BigDecimal(polymarket.yesAskDollars());
+            BigDecimal noPoly = new BigDecimal(polymarket.noAskDollars());
 
-            BigDecimal arb1 = BigDecimal.ONE.subtract(yesAskKalshi.add(noAskPoly));
-            BigDecimal arb2 = BigDecimal.ONE.subtract(yesAskPoly.add(noAskKalshi));
+            BigDecimal yesKalshiDecimal = BigDecimal.ONE.divide(yesKalshi, 10, RoundingMode.HALF_UP);
+            BigDecimal noKalshiDecimal = BigDecimal.ONE.divide(noKalshi, 10, RoundingMode.HALF_UP);
+            BigDecimal yesPolyDecimal = BigDecimal.ONE.divide(yesPoly, 10, RoundingMode.HALF_UP);
+            BigDecimal noPolyDecimal = BigDecimal.ONE.divide(noPoly, 10, RoundingMode.HALF_UP);
 
-            BigDecimal arbitragePercentage = arb1.max(arb2)
-                    .multiply(BigDecimal.valueOf(100))
-                    .setScale(4, RoundingMode.HALF_UP);
+            BigDecimal arb1 = calculateArbitragePercentage(yesKalshiDecimal, noPolyDecimal);
+            BigDecimal arb2 = calculateArbitragePercentage(yesPolyDecimal, noKalshiDecimal);
+
+            // Pick the higher arbitrage percentage
+            BigDecimal arbitragePercentage = arb1.max(arb2).setScale(4, RoundingMode.HALF_UP);
 
             boolean isArbitrage = arbitragePercentage.compareTo(BigDecimal.ZERO) > 0;
 
-            int kalshiYesOdds = convertToAmericanOdds(yesAskKalshi);
-            int kalshiNoOdds = convertToAmericanOdds(noAskKalshi);
-            int polyYesOdds = convertToAmericanOdds(yesAskPoly);
-            int polyNoOdds = convertToAmericanOdds(noAskPoly);
+            int yesKalshiOdds = convertToAmericanOdds(yesKalshi);
+            int noKalshiOdds = convertToAmericanOdds(noKalshi);
+            int yesPolyOdds = convertToAmericanOdds(yesPoly);
+            int noPolyOdds = convertToAmericanOdds(noPoly);
 
             Market updatedKalshi = MarketBuilderAdapter
                     .from(kalshi)
                     .toBuilder()
-                    .americanYesOdds(formatOdds(kalshiYesOdds))
-                    .americanNoOdds(formatOdds(kalshiNoOdds))
+                    .americanYesOdds(formatOdds(yesKalshiOdds))
+                    .americanNoOdds(formatOdds(noKalshiOdds))
                     .build()
                     .toRecord();
 
             Market updatedPoly = MarketBuilderAdapter
                     .from(polymarket)
                     .toBuilder()
-                    .americanYesOdds(formatOdds(polyYesOdds))
-                    .americanNoOdds(formatOdds(polyNoOdds))
+                    .americanYesOdds(formatOdds(yesPolyOdds))
+                    .americanNoOdds(formatOdds(noPolyOdds))
                     .build()
                     .toRecord();
 
-            updatedMatchedGames.add(
-                    new MatchedGame(updatedKalshi, updatedPoly, isArbitrage, arbitragePercentage));
+            updatedMatchedGames.add(new MatchedGame(updatedKalshi, updatedPoly, isArbitrage, arbitragePercentage));
         }
 
         return updatedMatchedGames;
@@ -71,9 +74,10 @@ public class ArbitrageCalculator {
             BigDecimal yesAsk = new BigDecimal(game.yesAskDollars());
             BigDecimal noAsk = new BigDecimal(game.noAskDollars());
 
-            BigDecimal arbitragePercentage = BigDecimal.ONE
-                    .subtract(yesAsk.add(noAsk))
-                    .multiply(BigDecimal.valueOf(100))
+            BigDecimal yesDecimal = BigDecimal.ONE.divide(yesAsk, 10, RoundingMode.HALF_UP);
+            BigDecimal noDecimal = BigDecimal.ONE.divide(noAsk, 10, RoundingMode.HALF_UP);
+
+            BigDecimal arbitragePercentage = calculateArbitragePercentage(yesDecimal, noDecimal)
                     .setScale(4, RoundingMode.HALF_UP);
 
             boolean isArbitrage = arbitragePercentage.compareTo(BigDecimal.ZERO) > 0;
@@ -91,29 +95,32 @@ public class ArbitrageCalculator {
 
             updatedGames.add(new SingularArbitrage(updatedMarket, isArbitrage, arbitragePercentage));
         }
+
         return updatedGames;
     }
 
-
     public int convertToAmericanOdds(BigDecimal price) {
-        if (price.compareTo(BigDecimal.ZERO) <= 0 || price.compareTo(BigDecimal.ONE) >= 0) {
-            throw new IllegalArgumentException("Price must be between 0 and 1 (exclusive)");
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than 0");
         }
 
-        BigDecimal decimalOdds = BigDecimal.ONE.divide(price, 10, RoundingMode.HALF_UP);
-        BigDecimal americanOdds;
+        BigDecimal decimal = BigDecimal.ONE.divide(price, 10, RoundingMode.HALF_UP);
+        BigDecimal odds;
 
-        if (decimalOdds.compareTo(new BigDecimal("2.0")) >= 0) {
-            americanOdds = decimalOdds.subtract(BigDecimal.ONE).multiply(new BigDecimal("100"));
+        if (decimal.compareTo(new BigDecimal("2.0")) >= 0) {
+            odds = decimal.subtract(BigDecimal.ONE).multiply(new BigDecimal("100")); // positive
         } else {
-            americanOdds = BigDecimal.valueOf(-100)
-                    .divide(decimalOdds.subtract(BigDecimal.ONE), 10, RoundingMode.HALF_UP);
+            odds = new BigDecimal("-100").divide(decimal.subtract(BigDecimal.ONE), 10, RoundingMode.HALF_UP); // negative
         }
 
-        return americanOdds.setScale(0, RoundingMode.HALF_UP).intValue();
+        return odds.setScale(0, RoundingMode.HALF_UP).intValue();
     }
 
     public String formatOdds(int odds) {
         return (odds > 0 ? "+" : "") + odds;
+    }
+
+    private BigDecimal calculateArbitragePercentage(BigDecimal yesDecimal, BigDecimal noDecimal) {
+        return yesDecimal.add(noDecimal).subtract(BigDecimal.ONE).multiply(BigDecimal.valueOf(100));
     }
 }

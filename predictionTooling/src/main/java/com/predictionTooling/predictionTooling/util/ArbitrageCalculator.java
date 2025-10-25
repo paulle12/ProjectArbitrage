@@ -53,6 +53,7 @@ public class ArbitrageCalculator {
                     .noAskDollars(kalshi.noAskDollars())
                     .americanYesOdds(formatOdds(kalshiYesOdds))
                     .americanNoOdds(formatOdds(kalshiNoOdds))
+                    .orderBook(kalshi.orderBook())
                     .build()
                     .toRecord();
 
@@ -107,6 +108,7 @@ public class ArbitrageCalculator {
                     .noAskDollars(game.noAskDollars())
                     .americanYesOdds(formatOdds(yesOdds))
                     .americanNoOdds(formatOdds(noOdds))
+                    .orderBook(game.orderBook())
                     .build()
                     .toRecord();
 

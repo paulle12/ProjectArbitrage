@@ -47,12 +47,22 @@ public class OrderbookService {
         }
     }
 
-    /** Scheduled cleanup: runs every day at midnight */
+    // Scheduled cleanup: runs every day at midnight
     @Scheduled(cron = "0 0 0 * * ?")
     public void cleanupOldData() {
         try {
             int deleted = repository.cleanupOldData();
             System.out.println("🧹 Cleanup executed. Rows deleted: " + deleted);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Delete data
+    public void deleteRow(String contractId) {
+        try {
+            int deleted = repository.deleteRow(contractId);
+            System.out.println(" Rows deleted: " + deleted);
         } catch (SQLException e) {
             e.printStackTrace();
         }

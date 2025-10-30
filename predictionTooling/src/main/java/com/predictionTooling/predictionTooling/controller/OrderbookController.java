@@ -19,28 +19,35 @@ public class OrderbookController {
         this.orderbookService = orderbookService;
     }
 
-    /** Get all orderbook entries */
+    // Get all orderbook entries
     @GetMapping("/all")
     public List<OrderbookEntry> getAllOrderbookEntries() {
         return orderbookService.getAllOrderbookEntries();
     }
 
-    /** Get all bids and asks for a given contract */
+    // Get all bids and asks for a given contract
     @GetMapping("/{contractId}")
     public List<BidAsk> getAllBidsAndAsks(@PathVariable String contractId) {
         return orderbookService.getAllBidsAndAsks(contractId);
     }
 
-    /** Get top bid and ask for a given contract */
+    // Get top bid and ask for a given contract
     @GetMapping("/{contractId}/top")
     public List<BidAsk> getTopBidAsk(@PathVariable String contractId) {
         return orderbookService.getTopBidAsk(contractId);
     }
 
-    /** Manual cleanup endpoint (optional) */
+    // Manual cleanup endpoint (optional)
     @DeleteMapping("/cleanup")
     public String cleanupOldData() {
         orderbookService.cleanupOldData();
         return "Cleanup completed. Rows deleted: " ;
+    }
+
+    // Manual row delete
+    @DeleteMapping("/delete/{contractId}")
+    public String deleteRow(@PathVariable String contractId) {
+        orderbookService.deleteRow(contractId);
+        return "Rows deleted: " ;
     }
 }

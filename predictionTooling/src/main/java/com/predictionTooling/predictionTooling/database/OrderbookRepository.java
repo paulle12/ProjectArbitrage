@@ -91,6 +91,14 @@ public class OrderbookRepository {
         }
     }
 
+    // Delete row
+    public int deleteRow(String contractId) throws SQLException {
+        String sql = "DELETE FROM orderbook_updates WHERE contract_id = ? '";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        }
+    }
+
     // Fetch all bids and asks for a given contract
     public List<BidAsk> getAllBidsAndAsks(String contractId) throws SQLException {
         String sql = """

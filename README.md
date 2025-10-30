@@ -68,5 +68,7 @@ GET http://localhost:8080/data/getArbitrage
 ]
 ```
 
-**DB Access**
-https://docs.google.com/document/d/1ZgZ85maXLcxJ_1QqHzKts6t6X7PszAbyuakrtMfyERQ/edit?tab=t.0
+**DB Access information**
+
+To acces the DB and everything related to the DB check out this [doc](https://docs.google.com/document/d/1ZgZ85maXLcxJ_1QqHzKts6t6X7PszAbyuakrtMfyERQ/edit?tab=t.0)
+

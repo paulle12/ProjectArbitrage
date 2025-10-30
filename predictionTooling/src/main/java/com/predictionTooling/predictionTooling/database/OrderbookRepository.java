@@ -22,7 +22,8 @@ public class OrderbookRepository {
                 id SERIAL PRIMARY KEY,
                 contract_id TEXT NOT NULL,
                 timestamp TIMESTAMPTZ NOT NULL,
-                payload JSONB NOT NULL
+                payload JSONB NOT NULL,
+                UNIQUE (contract_id, timestamp)
             );
         """;
         try (Statement stmt = connection.createStatement()) {
@@ -75,7 +76,7 @@ public class OrderbookRepository {
                 "total_volume": 180,
                 "market_status": "open"
              }'::jsonb)
-            ON CONFLICT DO NOTHING;
+             ON CONFLICT (contract_id, timestamp) DO NOTHING;
         """;
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(insertDummy);

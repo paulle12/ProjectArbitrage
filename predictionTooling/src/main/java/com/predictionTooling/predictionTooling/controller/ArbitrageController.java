@@ -22,18 +22,13 @@ public class ArbitrageController {
         return ResponseEntity.ok(matchService.getMatchedGames());
     }
 
-    @GetMapping("/getArbitrage")
+    @GetMapping("/arbitrage")
     public ResponseEntity<List<MatchedGame>> getMarketsWithArbitrage() {
         return ResponseEntity.ok(matchService.getArbitrage());
     }
 
-    @GetMapping("/getSingleMarketArbitrage")
+    @GetMapping("/arbitrage/single/kalshi")
     public ResponseEntity<List<SingularArbitrage>> getSingleMarketsWithArbitrage() {
         return ResponseEntity.ok(matchService.getSingleMarketArbitrage());
-    }
-
-    @GetMapping("/getLiveSingleMarketArbitrage")
-    public ResponseEntity<List<SingularArbitrage>> getLiveSingleMarketsWithArbitrage() {
-        return ResponseEntity.ok(matchService.getLiveSingleMarketArbitrage());
     }
 }

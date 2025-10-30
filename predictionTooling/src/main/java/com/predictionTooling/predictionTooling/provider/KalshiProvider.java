@@ -88,7 +88,7 @@ public class KalshiProvider implements MarketProvider {
                         .toEntity(String.class);
 
                 System.out.println("[Kalshi.markets] status=" + entity.getStatusCode()
-                            + " contentType=" + entity.getHeaders().getContentType());
+                        + " contentType=" + entity.getHeaders().getContentType());
                 System.out.println("[Kalshi.markets] raw body=" + snippet(entity.getBody(), 500));
 
                 if (isJson(entity) && entity.getBody() != null) {
@@ -191,8 +191,8 @@ public class KalshiProvider implements MarketProvider {
 
         List<Market> updatedMarkets = new ArrayList<>();
 
-        //we can adjust how many results we get from the order book
-        //its returned in order of price descending and max depth is 100
+        // we can adjust how many results we get from the order book
+        // its returned in order of price descending and max depth is 100
         int depth = 100;
         for (Market market : collected) {
             try {
@@ -230,7 +230,6 @@ public class KalshiProvider implements MarketProvider {
                         .build()
                         .toRecord();
 
-
                 updatedMarkets.add(updatedMarket);
 
             } catch (Exception e) {
@@ -242,13 +241,9 @@ public class KalshiProvider implements MarketProvider {
         }
 
         return updatedMarkets;
-
-        //If we only want to return markets that had a valid Orderbook:
-//        return updatedMarkets.stream()
-//                .filter(m -> m.orderBook() != null)
-//                .toList();
     }
-    // ---------- Helpers ----------
+
+    // ---------- Helpers ---------- KXATPMATCH-25OCT30FRIBUB-FRI
 
     private static boolean isJson(ResponseEntity<?> entity) {
         var ct = entity.getHeaders().getContentType();

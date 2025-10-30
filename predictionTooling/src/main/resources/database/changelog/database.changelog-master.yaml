@@ -1,0 +1,109 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dev
+      changes:
+        - createTable:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: market_ticker
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            columnNames: market_ticker, timestamp
+            constraintName: unique_contract_timestamp
+            tableName: orderbook_updates
+
+  - changeSet:
+      id: 2
+      author: dev
+      changes:
+        - createIndex:
+            tableName: orderbook_updates
+            indexName: idx_orderbook_contract_time
+            columns:
+              - column:
+                  name: market_ticker
+              - column:
+                  name: timestamp
+        - createIndex:
+            tableName: orderbook_updates
+            indexName: idx_orderbook_payload_gin
+            using: GIN
+            columns:
+              - column:
+                  name: payload
+
+  - changeSet:
+      id: 3
+      author: dev
+      changes:
+        - insert:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: market_ticker
+                  value: NHL_TOR_MTL_HOMEWIN
+              - column:
+                  name: timestamp
+                  valueDate: 2025-10-29T20:55:12.123Z
+              - column:
+                  name: payload
+                  value: |
+                    {
+                      "market_ticker": "NHL_TOR_MTL_HOMEWIN",
+                      "contract_type": "Moneyline",
+                      "home_team": "Toronto Maple Leafs",
+                      "away_team": "Montreal Canadiens",
+                      "sequence": 34122,
+                      "timestamp": "2025-10-29T20:55:12.123Z",
+                      "bids": [[0.44, 80], [0.43, 50], [0.42, 30]],
+                      "asks": [[0.56, 60], [0.57, 40], [0.58, 25]],
+                      "last_traded_price": 0.45,
+                      "total_volume": 300,
+                      "market_status": "open"
+                    }
+        - insert:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: market_ticker
+                  value: MLS_LAFC_ATL_AWAYWIN
+              - column:
+                  name: timestamp
+                  valueDate: 2025-10-29T21:15:10.456Z
+              - column:
+                  name: payload
+                  value: |
+                    {
+                      "market_ticker": "MLS_LAFC_ATL_AWAYWIN",
+                      "contract_type": "Moneyline",
+                      "home_team": "LAFC",
+                      "away_team": "Atlanta United",
+                      "sequence": 8451,
+                      "timestamp": "2025-10-29T21:15:10.456Z",
+                      "bids": [[0.35, 90], [0.34, 60]],
+                      "asks": [[0.65, 50], [0.66, 40]],
+                      "last_traded_price": 0.36,
+                      "total_volume": 180,
+                      "market_status": "open"
+                    }

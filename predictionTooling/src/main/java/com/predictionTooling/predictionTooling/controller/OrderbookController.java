@@ -4,9 +4,12 @@ import com.predictionTooling.predictionTooling.model.BidAsk;
 import com.predictionTooling.predictionTooling.model.OrderbookEntry;
 import com.predictionTooling.predictionTooling.service.OrderbookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orderbook")
@@ -44,10 +47,13 @@ public class OrderbookController {
         return "Cleanup completed. Rows deleted: " ;
     }
 
-    // Manual row delete
     @DeleteMapping("/delete/{contractId}")
-    public String deleteRow(@PathVariable String contractId) {
-        orderbookService.deleteRow(contractId);
-        return "Rows deleted: " ;
+    public ResponseEntity<Map<String, Object>> deleteRow(@PathVariable String contractId) {
+        int rowsDeleted = orderbookService.deleteRow(contractId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("contractId", contractId);
+        response.put("rowsDeleted", rowsDeleted);
+        return ResponseEntity.ok(response);
+
     }
 }

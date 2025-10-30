@@ -15,7 +15,7 @@ public class OrderbookRepository {
         this.connection = connection;
     }
 
-    /** Create table if it does not exist */
+    // Create table if it does not exist
     public void createTableIfNotExists() throws SQLException {
         String createTable = """
             CREATE TABLE IF NOT EXISTS orderbook_updates (
@@ -30,7 +30,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Create indexes for performance */
+    // Create indexes for performance 
     public void createIndexes() throws SQLException {
         String createIndexes = """
             CREATE INDEX IF NOT EXISTS idx_orderbook_contract_time
@@ -43,7 +43,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Insert dummy data if not already present */
+    // Insert dummy data if not already present
     public void insertDummyData() throws SQLException {
         String insertDummy = """
             INSERT INTO orderbook_updates (contract_id, timestamp, payload) VALUES
@@ -82,7 +82,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Clean up old data (older than 14 days) */
+    // Clean up old data (older than 14 days)
     public int cleanupOldData() throws SQLException {
         String sql = "DELETE FROM orderbook_updates WHERE timestamp < NOW() - INTERVAL '14 days'";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -90,7 +90,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Fetch all bids and asks for a given contract */
+    // Fetch all bids and asks for a given contract
     public List<BidAsk> getAllBidsAndAsks(String contractId) throws SQLException {
         String sql = """
             SELECT payload->'bids' AS bids, payload->'asks' AS asks
@@ -111,7 +111,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Fetch top bid/ask for a given contract */
+    // Fetch top bid/ask for a given contract
     public List<BidAsk> getTopBidAsk(String contractId) throws SQLException {
         String sql = """
             SELECT
@@ -135,7 +135,7 @@ public class OrderbookRepository {
         }
     }
 
-    /** Fetch all orderbook entries */
+    // Fetch all orderbook entries
     public List<OrderbookEntry> getAllOrderbookEntries() throws SQLException {
         String sql = "SELECT contract_id, timestamp, payload FROM orderbook_updates ORDER BY timestamp ASC";
         try (Statement stmt = connection.createStatement();

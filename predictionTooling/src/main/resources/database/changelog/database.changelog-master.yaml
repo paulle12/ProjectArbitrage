@@ -29,9 +29,9 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addUniqueConstraint:
+            tableName: orderbook_updates
             columnNames: market_ticker, timestamp
             constraintName: unique_contract_timestamp
-            tableName: orderbook_updates
 
   - changeSet:
       id: 2
@@ -62,48 +62,49 @@ databaseChangeLog:
             columns:
               - column:
                   name: market_ticker
-                  value: NHL_TOR_MTL_HOMEWIN
+                  value: KXALIENS-26
               - column:
                   name: timestamp
-                  valueDate: 2025-10-29T20:55:12.123Z
+                  valueDate: 2025-10-31T00:16:27.64954Z
               - column:
                   name: payload
                   value: |
                     {
-                      "market_ticker": "NHL_TOR_MTL_HOMEWIN",
-                      "contract_type": "Moneyline",
-                      "home_team": "Toronto Maple Leafs",
-                      "away_team": "Montreal Canadiens",
-                      "sequence": 34122,
-                      "timestamp": "2025-10-29T20:55:12.123Z",
-                      "bids": [[0.44, 80], [0.43, 50], [0.42, 30]],
-                      "asks": [[0.56, 60], [0.57, 40], [0.58, 25]],
-                      "last_traded_price": 0.45,
-                      "total_volume": 300,
-                      "market_status": "open"
+                      "market_ticker": "KXALIENS-26",
+                      "market_id": "a6fb64ba-0fc4-4f07-b79b-0cb34535e883",
+                      "price": 95,
+                      "price_dollars": 0.95,
+                      "delta": -1,
+                      "side": "no",
+                      "timestamp": "2025-10-31T00:16:27.64954Z",
+                      "total_volume": 0,
+                      "market_status": "open",
+                      "bids": [[0.94, 50], [0.93, 30]],
+                      "asks": [[0.96, 40], [0.97, 20]]
                     }
+
         - insert:
             tableName: orderbook_updates
             columns:
               - column:
                   name: market_ticker
-                  value: MLS_LAFC_ATL_AWAYWIN
+                  value: KXALIENS-27
               - column:
                   name: timestamp
-                  valueDate: 2025-10-29T21:15:10.456Z
+                  valueDate: 2025-10-31T00:20:10.123Z
               - column:
                   name: payload
                   value: |
                     {
-                      "market_ticker": "MLS_LAFC_ATL_AWAYWIN",
-                      "contract_type": "Moneyline",
-                      "home_team": "LAFC",
-                      "away_team": "Atlanta United",
-                      "sequence": 8451,
-                      "timestamp": "2025-10-29T21:15:10.456Z",
-                      "bids": [[0.35, 90], [0.34, 60]],
-                      "asks": [[0.65, 50], [0.66, 40]],
-                      "last_traded_price": 0.36,
-                      "total_volume": 180,
-                      "market_status": "open"
+                      "market_ticker": "KXALIENS-27",
+                      "market_id": "b1c2d3e4-5678-90ab-cdef-1234567890ab",
+                      "price": 120,
+                      "price_dollars": 1.20,
+                      "delta": 2,
+                      "side": "yes",
+                      "timestamp": "2025-10-31T00:20:10.123Z",
+                      "total_volume": 100,
+                      "market_status": "open",
+                      "bids": [[1.18, 60], [1.17, 40]],
+                      "asks": [[1.22, 50], [1.23, 25]]
                     }

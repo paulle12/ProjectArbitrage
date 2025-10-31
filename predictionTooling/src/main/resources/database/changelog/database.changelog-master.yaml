@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dev
+      changes:
+        - createTable:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: market_ticker
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: orderbook_updates
+            columnNames: market_ticker, timestamp
+            constraintName: unique_contract_timestamp
+
+  - changeSet:
+      id: 2
+      author: dev
+      changes:
+        - createIndex:
+            tableName: orderbook_updates
+            indexName: idx_orderbook_contract_time
+            columns:
+              - column:
+                  name: market_ticker
+              - column:
+                  name: timestamp
+        - createIndex:
+            tableName: orderbook_updates
+            indexName: idx_orderbook_payload_gin
+            using: GIN
+            columns:
+              - column:
+                  name: payload
+
+  - changeSet:
+      id: 3
+      author: dev
+      changes:
+        - insert:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: market_ticker
+                  value: KXALIENS-26
+              - column:
+                  name: timestamp
+                  valueDate: 2025-10-31T00:16:27.64954Z
+              - column:
+                  name: payload
+                  value: |
+                    {
+                      "market_ticker": "KXALIENS-26",
+                      "market_id": "a6fb64ba-0fc4-4f07-b79b-0cb34535e883",
+                      "price": 95,
+                      "price_dollars": 0.95,
+                      "delta": -1,
+                      "side": "no",
+                      "timestamp": "2025-10-31T00:16:27.64954Z",
+                      "total_volume": 0,
+                      "market_status": "open",
+                      "bids": [[0.94, 50], [0.93, 30]],
+                      "asks": [[0.96, 40], [0.97, 20]]
+                    }
+
+        - insert:
+            tableName: orderbook_updates
+            columns:
+              - column:
+                  name: market_ticker
+                  value: KXALIENS-27
+              - column:
+                  name: timestamp
+                  valueDate: 2025-10-31T00:20:10.123Z
+              - column:
+                  name: payload
+                  value: |
+                    {
+                      "market_ticker": "KXALIENS-27",
+                      "market_id": "b1c2d3e4-5678-90ab-cdef-1234567890ab",
+                      "price": 120,
+                      "price_dollars": 1.20,
+                      "delta": 2,
+                      "side": "yes",
+                      "timestamp": "2025-10-31T00:20:10.123Z",
+                      "total_volume": 100,
+                      "market_status": "open",
+                      "bids": [[1.18, 60], [1.17, 40]],
+                      "asks": [[1.22, 50], [1.23, 25]]
+                    }

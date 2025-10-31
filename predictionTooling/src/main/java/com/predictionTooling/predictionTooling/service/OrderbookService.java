@@ -58,13 +58,14 @@ public class OrderbookService {
         }
     }
 
-    //Delete data
-    public void deleteRow(String contractId) {
+    public int deleteRow(String contractId) {
         try {
             int deleted = repository.deleteRow(contractId);
-            System.out.println(" Rows deleted: " + deleted);
+            System.out.println("🧹Rows deleted: " + deleted);
+            return deleted;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return 0;
     }
 }

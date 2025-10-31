@@ -44,7 +44,7 @@ public class OrderbookController {
     @DeleteMapping("/cleanup")
     public String cleanupOldData() {
         orderbookService.cleanupOldData();
-        return "Cleanup completed. Rows deleted: " ;
+        return "Cleanup completed. Rows deleted: ";
     }
 
     @DeleteMapping("/delete/{contractId}")

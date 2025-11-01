@@ -1,9 +1,9 @@
 package com.predictionTooling.predictionTooling.service;
 
+import com.predictionTooling.predictionTooling.client.PolyClient;
 import com.predictionTooling.predictionTooling.model.MatchedGame;
 import com.predictionTooling.predictionTooling.model.SingularArbitrage;
-import com.predictionTooling.predictionTooling.provider.KalshiProvider;
-import com.predictionTooling.predictionTooling.provider.PolyProvider;
+import com.predictionTooling.predictionTooling.client.KalshiClient;
 import org.springframework.stereotype.Service;
 import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.util.ArbitrageCalculator;
@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
-    private final KalshiProvider kalshiClient;
-    private final PolyProvider polyClient;
+    private final KalshiClient kalshiClient;
+    private final PolyClient polyClient;
     private final ArbitrageCalculator arbitrageCalculator;
 
     private static final Map<String, String> cityToTeam = Map.ofEntries(
@@ -69,7 +69,7 @@ public class MatchService {
             .sorted((a, b) -> Integer.compare(b.length(), a.length()))
             .toList();
 
-    public MatchService(KalshiProvider kalshiClient, PolyProvider polyClient, ArbitrageCalculator arbitrageCalculator) {
+    public MatchService(KalshiClient kalshiClient, PolyClient polyClient, ArbitrageCalculator arbitrageCalculator) {
         this.kalshiClient = kalshiClient;
         this.polyClient = polyClient;
         this.arbitrageCalculator = arbitrageCalculator;

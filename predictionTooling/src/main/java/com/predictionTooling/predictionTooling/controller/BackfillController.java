@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.predictionTooling.predictionTooling.provider.BackfillProvider;
+import com.predictionTooling.predictionTooling.client.BackfillClient;
 import com.predictionTooling.predictionTooling.config.Config;
 
 //Highly experimental will address later
@@ -31,8 +31,8 @@ public class BackfillController {
             String privateKey = Config.getPrivateKey();
             String restBase = pickRestBase(demo);
 
-            BackfillProvider provider = new BackfillProvider(restBase, keyId, privateKey);
-            Map<String, Object> result = provider.get1mCandles(series, market, startTs, endTs);
+            BackfillClient client = new BackfillClient(restBase, keyId, privateKey);
+            Map<String, Object> result = client.get1mCandles(series, market, startTs, endTs);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
@@ -54,8 +54,8 @@ public class BackfillController {
             String privateKey = Config.getPrivateKey();
             String restBase = pickRestBase(demo);
 
-            BackfillProvider provider = new BackfillProvider(restBase, keyId, privateKey);
-            Map<String, Object> result = provider.getTrades(market, minTs, maxTs, cursor, limit);
+            BackfillClient client = new BackfillClient(restBase, keyId, privateKey);
+            Map<String, Object> result = client.getTrades(market, minTs, maxTs, cursor, limit);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
@@ -77,8 +77,8 @@ public class BackfillController {
             String privateKey = Config.getPrivateKey();
             String restBase = pickRestBase(demo);
 
-            BackfillProvider provider = new BackfillProvider(restBase, keyId, privateKey);
-            Map<String, Object> result = provider.quickWindow(series, market, hours);
+            BackfillClient client = new BackfillClient(restBase, keyId, privateKey);
+            Map<String, Object> result = client.quickWindow(series, market, hours);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));

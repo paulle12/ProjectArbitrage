@@ -29,18 +29,18 @@ public class OrderbookService {
         }
     }
 
-    public List<BidAsk> getAllBidsAndAsks(String contractId) {
+    public List<BidAsk> getAllBidsAndAsks(String marketTicker) {
         try {
-            return repository.getAllBidsAndAsks(contractId);
+            return repository.getAllBidsAndAsks(marketTicker);
         } catch (SQLException e) {
             e.printStackTrace();
             return Collections.emptyList();
         }
     }
 
-    public List<BidAsk> getTopBidAsk(String contractId) {
+    public List<BidAsk> getTopBidAsk(String marketTicker) {
         try {
-            return repository.getTopBidAsk(contractId);
+            return repository.getTopBidAsk(marketTicker);
         } catch (SQLException e) {
             e.printStackTrace();
             return Collections.emptyList();
@@ -58,9 +58,9 @@ public class OrderbookService {
         }
     }
 
-    public int deleteRow(String contractId) {
+    public int deleteRow(String marketTicker) {
         try {
-            int deleted = repository.deleteRow(contractId);
+            int deleted = repository.deleteRow(marketTicker);
             System.out.println("🧹Rows deleted: " + deleted);
             return deleted;
         } catch (SQLException e) {

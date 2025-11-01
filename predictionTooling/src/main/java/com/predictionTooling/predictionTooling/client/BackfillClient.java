@@ -1,4 +1,4 @@
-package com.predictionTooling.predictionTooling.provider;
+package com.predictionTooling.predictionTooling.client;
 
 import java.net.URI;
 import java.net.http.*;
@@ -10,14 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionTooling.predictionTooling.auth.KalshiSigner;
 
 //Highly experimental will address later
-public class BackfillProvider {
+public class BackfillClient {
     private final String restBase; // e.g. https://demo-api.kalshi.co OR https://api.elections.kalshi.com
     private final String keyId; // Kalshi API key id
     private final String privateKeyPem; // RSA-PSS private key PEM contents
     private final HttpClient http = HttpClient.newHttpClient();
     private final ObjectMapper json = new ObjectMapper();
 
-    public BackfillProvider(String restBase, String keyId, String privateKeyPem) {
+    public BackfillClient(String restBase, String keyId, String privateKeyPem) {
         this.restBase = restBase;
         this.keyId = keyId;
         this.privateKeyPem = privateKeyPem;

@@ -1,7 +1,7 @@
 package com.predictionTooling.predictionTooling.controller;
 
+import com.predictionTooling.predictionTooling.client.PolyClient;
 import com.predictionTooling.predictionTooling.model.Market;
-import com.predictionTooling.predictionTooling.provider.PolyProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +15,10 @@ import java.util.Map;
 @RequestMapping("/poly")
 public class PolyController {
 
-    private final PolyProvider polyProvider;
+    private final PolyClient polyClient;
 
-    public PolyController(PolyProvider polyProvider) {
-        this.polyProvider = polyProvider;
+    public PolyController(PolyClient polyClient) {
+        this.polyClient = polyClient;
     }
 
     // TODO: not sure how much we want to do with this maybe can be resolved as
@@ -26,7 +26,7 @@ public class PolyController {
     @GetMapping("/nfl")
     public ResponseEntity<String> getNFLMarkets(@RequestParam Map<String, String> query) {
         try {
-            List<Market> data = polyProvider.fetchNFL();
+            List<Market> data = polyClient.fetchNFL();
             return ResponseEntity.ok(data.toString());
         } catch (IllegalArgumentException iae) {
             return ResponseEntity.badRequest().body("{\"error\":\"" + iae.getMessage().replace("\"", "\\\"") + "\"}");

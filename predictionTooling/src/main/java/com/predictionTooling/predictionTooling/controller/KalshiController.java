@@ -4,24 +4,29 @@ import java.net.http.WebSocket;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.predictionTooling.predictionTooling.database.OrderbookRepository;
 import org.springframework.web.bind.annotation.*;
 
-import com.predictionTooling.predictionTooling.provider.KalshiWsProvider;
+import com.predictionTooling.predictionTooling.client.KalshiWsClient;
 import com.predictionTooling.predictionTooling.config.Config;
 
 @RestController
 @RequestMapping("/kalshi")
 public class KalshiController {
-    private KalshiWsProvider provider;
+    private KalshiWsClient client;
     private CompletableFuture<WebSocket> connectionFuture;
+    private final OrderbookRepository orderbookRepository;
 
+    public KalshiController(OrderbookRepository orderbookRepository) {
+        this.orderbookRepository = orderbookRepository;
+    }
     @PostMapping("/open")
     public String openConnection(
             @RequestParam(required = true) List<String> tickers,
             @RequestParam(defaultValue = "true") boolean trades,
             @RequestParam(defaultValue = "true") boolean orderbook) {
         try {
-            if (provider != null) {
+            if (client != null) {
                 return "Connection already active.";
             }
 
@@ -37,10 +42,10 @@ public class KalshiController {
                 return "Error: No tickers provided. Please include at least one, e.g. ?tickers=KXNHLGAME-25OCT29BOSNYR";
             }
 
-            // Create provider instance
-            provider = new KalshiWsProvider(wsUrl, keyId, privateKey);
+            // Create client instance
+            client = new KalshiWsClient(wsUrl, keyId, privateKey,orderbookRepository);
 
-            connectionFuture = provider.open(tickers, trades, orderbook);
+            connectionFuture = client.open(tickers, trades, orderbook);
             return "Kalshi WebSocket connection started successfully for tickers: " + String.join(", ", tickers);
 
         } catch (Exception e) {
@@ -52,11 +57,11 @@ public class KalshiController {
     @PostMapping("/close")
     public String closeConnection() {
         try {
-            if (provider == null) {
+            if (client == null) {
                 return "No active connection to close.";
             }
-            provider.close();
-            provider = null;
+            client.close();
+            client = null;
             return "Kalshi WebSocket connection closed successfully.";
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +71,7 @@ public class KalshiController {
 
     @GetMapping("/status")
     public String status() {
-        return (provider == null)
+        return (client == null)
                 ? "No active WebSocket connection."
                 : "WebSocket connection is active.";
     }

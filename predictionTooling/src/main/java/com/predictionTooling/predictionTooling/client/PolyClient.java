@@ -1,10 +1,11 @@
-package com.predictionTooling.predictionTooling.provider;
+package com.predictionTooling.predictionTooling.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.predictionTooling.predictionTooling.model.Market;
 import com.predictionTooling.predictionTooling.model.Orderbook;
+import com.predictionTooling.predictionTooling.provider.MarketProvider;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -23,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Pattern;
 
 @Component
-public class PolyProvider implements MarketProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PolyProvider.class.getName());
+public class PolyClient implements MarketProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolyClient.class.getName());
 
     private final RestClient client;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -41,9 +42,9 @@ public class PolyProvider implements MarketProvider {
     // poly,base-url: is used if its being pulled from a config if there is no
     // config it defaults to the given url
     // public
-    // PolyProvider(@Value("${poly.base-url:https://gamma-api.polymarket.com}")
+    // PolyClient(@Value("${poly.base-url:https://gamma-api.polymarket.com}")
     // String baseUrl) {
-    public PolyProvider() {
+    public PolyClient() {
         this.client = RestClient.builder().baseUrl("https://gamma-api.polymarket.com").build();
     }
 
@@ -126,7 +127,7 @@ public class PolyProvider implements MarketProvider {
             }
 
         } catch (Exception e) {
-            LOGGER.error("[PolyProvider] Error fetching NFL markets: " + e.getMessage(), e);
+            LOGGER.error("[PolyClient] Error fetching NFL markets: " + e.getMessage(), e);
         }
 
         return List.of();

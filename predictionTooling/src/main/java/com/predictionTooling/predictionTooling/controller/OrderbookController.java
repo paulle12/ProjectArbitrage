@@ -29,15 +29,15 @@ public class OrderbookController {
     }
 
     // Get all bids and asks for a given contract
-    @GetMapping("/{contractId}")
-    public List<BidAsk> getAllBidsAndAsks(@PathVariable String contractId) {
-        return orderbookService.getAllBidsAndAsks(contractId);
+    @GetMapping("/{marketTicker}")
+    public List<BidAsk> getAllBidsAndAsks(@PathVariable String marketTicker) {
+        return orderbookService.getAllBidsAndAsks(marketTicker);
     }
 
     // Get top bid and ask for a given contract
-    @GetMapping("/{contractId}/top")
-    public List<BidAsk> getTopBidAsk(@PathVariable String contractId) {
-        return orderbookService.getTopBidAsk(contractId);
+    @GetMapping("/{marketTicker}/top")
+    public List<BidAsk> getTopBidAsk(@PathVariable String marketTicker) {
+        return orderbookService.getTopBidAsk(marketTicker);
     }
 
     // Manual cleanup endpoint (optional)
@@ -47,11 +47,11 @@ public class OrderbookController {
         return "Cleanup completed. Rows deleted: ";
     }
 
-    @DeleteMapping("/delete/{contractId}")
-    public ResponseEntity<Map<String, Object>> deleteRow(@PathVariable String contractId) {
-        int rowsDeleted = orderbookService.deleteRow(contractId);
+    @DeleteMapping("/delete/{marketTicker}")
+    public ResponseEntity<Map<String, Object>> deleteRow(@PathVariable String marketTicker) {
+        int rowsDeleted = orderbookService.deleteRow(marketTicker);
         Map<String, Object> response = new HashMap<>();
-        response.put("contractId", contractId);
+        response.put("marketTicker", marketTicker);
         response.put("rowsDeleted", rowsDeleted);
         return ResponseEntity.ok(response);
 

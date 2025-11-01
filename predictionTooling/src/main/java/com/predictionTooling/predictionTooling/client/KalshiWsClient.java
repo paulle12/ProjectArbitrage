@@ -1,28 +1,35 @@
-package com.predictionTooling.predictionTooling.provider;
+package com.predictionTooling.predictionTooling.client;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
 import com.predictionTooling.predictionTooling.auth.KalshiSigner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.predictionTooling.predictionTooling.database.OrderbookRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-public class KalshiWsProvider {
+public class KalshiWsClient {
     private final String wsUrl; // demo or prod
     private final String keyId; // KALSHI-ACCESS-KEY
     private final String privateKey; // PEM string for signing (RSA-PSS)
     private WebSocket ws;
     private final ObjectMapper json = new ObjectMapper();
+    private final OrderbookRepository orderbookRepository;
 
-    public KalshiWsProvider(String wsUrl, String keyId, String privateKeyPem) {
+    public KalshiWsClient(String wsUrl, String keyId, String privateKeyPem, OrderbookRepository orderbookRepository) {
         this.wsUrl = wsUrl;
         this.keyId = keyId;
         this.privateKey = privateKeyPem;
+        this.orderbookRepository = orderbookRepository;
     }
 
     public CompletableFuture<WebSocket> open(List<String> marketTickers, boolean wantTrades, boolean wantOrderbook) {
@@ -135,7 +142,14 @@ public class KalshiWsProvider {
         System.out.println("SNAPSHOT " + Instant.now() + " " + data);
     }
 
-    private void handleOrderbookDelta(Map<?, ?> data) {
+    private void handleOrderbookDelta(Map<?, ?> data) throws SQLException {
+        //insert data into database
+        try {
+            orderbookRepository.insertDelta(data);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         System.out.println("DELTA    " + Instant.now() + " " + data);
     }
 

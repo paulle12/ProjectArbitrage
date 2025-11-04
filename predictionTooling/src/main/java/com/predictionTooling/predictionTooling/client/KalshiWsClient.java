@@ -143,17 +143,20 @@ public class KalshiWsClient {
     }
 
     private void handleOrderbookDelta(Map<?, ?> data) throws SQLException {
-        //insert data into database
         try {
-            orderbookRepository.insertDelta(data);
+            orderbookRepository.insertRecord("orderbook_updates", data);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         System.out.println("DELTA    " + Instant.now() + " " + data);
     }
 
     private void handleTrade(Map<?, ?> data) {
+        try {
+            orderbookRepository.insertRecord("trades", data);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         System.out.println("TRADE    " + Instant.now() + " " + data);
     }
 }

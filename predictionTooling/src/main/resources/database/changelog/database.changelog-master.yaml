@@ -108,3 +108,60 @@ databaseChangeLog:
                       "bids": [[1.18, 60], [1.17, 40]],
                       "asks": [[1.22, 50], [1.23, 25]]
                     }
+
+  - changeSet:
+      id: 4
+      author: esama
+      changes:
+        - createTable:
+            tableName: trades
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: trade_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: market_ticker
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: JSONB
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: trades
+            indexName: idx_trade_contract_time
+            columns:
+              - column:
+                  name: market_ticker
+              - column:
+                  name: timestamp
+
+        - createIndex:
+            tableName: trades
+            indexName: idx_trades_payload_gin
+            using: GIN
+            columns:
+              - column:
+                  name: payload
+
+        - addUniqueConstraint:
+            tableName: trades
+            columnNames: trade_id
+            constraintName: unique_trade_id

@@ -8,11 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Repository
 public class OrderbookRepository {
@@ -113,30 +115,58 @@ public class OrderbookRepository {
         }
     }
 
-    public void insertDelta(Map<?, ?> data) throws SQLException {
+    public void insertRecord(String tableName, Map<?, ?> data) throws SQLException {
         String marketTicker = (String) data.get("market_ticker");
-        String tsString = (String) data.get("ts");
-        Timestamp timestamp = Timestamp.from(OffsetDateTime.parse(tsString, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant());
+        Object tsValue = data.get("ts");
 
-        ObjectMapper mapper = new ObjectMapper();
+        if (marketTicker == null || tsValue == null) {
+            throw new SQLException("Missing required fields: market_ticker or ts");
+        }
+
+        // Parse timestamp
+        Instant instant = (tsValue instanceof Number)
+                ? Instant.ofEpochSecond(((Number) tsValue).longValue())
+                : OffsetDateTime.parse(tsValue.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant();
+        Timestamp timestamp = Timestamp.from(instant);
+
+        // Convert payload to JSON
         String payloadJson;
         try {
-            payloadJson = mapper.writeValueAsString(data);
+            payloadJson = new ObjectMapper().writeValueAsString(data);
         } catch (Exception e) {
             throw new SQLException("Failed to convert payload to JSON", e);
         }
 
-        String sql = "INSERT INTO orderbook_updates " +
-                "(market_ticker, timestamp, payload)" +
-                " VALUES (?,?,?::jsonb)";
+        // Determine SQL and parameters
+        String sql;
+        Object[] params;
 
+        switch (tableName.toLowerCase()) {
+            case "trades":
+                String tradeId = (String) data.get("trade_id");
+                if (tradeId == null) throw new SQLException("Missing trade_id for trades table");
+
+                sql = "INSERT INTO trades (trade_id, market_ticker, timestamp, payload) " +
+                        "VALUES (?, ?, ?, ?::jsonb) ON CONFLICT (trade_id) DO NOTHING";
+                params = new Object[]{UUID.fromString(tradeId), marketTicker, timestamp, payloadJson};
+                break;
+
+            case "orderbook_updates":
+                sql = "INSERT INTO orderbook_updates (market_ticker, timestamp, payload) " +
+                        "VALUES (?, ?, ?::jsonb) ON CONFLICT (market_ticker, timestamp) DO NOTHING";
+                params = new Object[]{marketTicker, timestamp, payloadJson};
+                break;
+
+            default:
+                throw new SQLException("Unknown table: " + tableName);
+        }
+
+        // Execute
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, marketTicker);
-            ps.setTimestamp(2, timestamp);
-            ps.setString(3, payloadJson);
-
+            for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
             ps.executeUpdate();
         }
     }
+
 }

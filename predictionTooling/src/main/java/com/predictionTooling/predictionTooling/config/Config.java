@@ -1,29 +1,37 @@
 package com.predictionTooling.predictionTooling.config;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
+
     private static final Dotenv dotenv = Dotenv.configure()
-            .directory(System.getProperty("user.dir")) // current working directory
-            .filename(".env")
+            .directory(System.getProperty("user.dir"))
+            .filename(".env")  // fallback for local development
+            .ignoreIfMissing()
             .load();
 
-    // Fetch your Kalshi Access Key ID from .env
+    // Get Kalshi Key ID
     public static String getKeyId() {
-        String keyId = dotenv.get("KALSHI_KEY_ID");
+        String keyId = System.getenv("KALSHI_KEY_ID");        // Docker
         if (keyId == null || keyId.isEmpty()) {
-            throw new RuntimeException("Missing KALSHI_KEY_ID in .env file");
+            keyId = dotenv.get("KALSHI_KEY_ID");              // Local
+        }
+        if (keyId == null || keyId.isEmpty()) {
+            throw new RuntimeException("Missing KALSHI_KEY_ID");
         }
         return keyId;
     }
 
-    // Read your private key PEM file
+    // Get Kalshi Private Key
     public static String getPrivateKey() {
-        String pemPath = dotenv.get("KALSHI_PRIVATE_KEY_PEM_PATH");
+        String pemPath = System.getenv("KALSHI_PRIVATE_KEY_PEM_PATH"); // Docker
         if (pemPath == null || pemPath.isEmpty()) {
-            throw new RuntimeException("Missing KALSHI_PRIVATE_KEY_PEM_PATH in .env file");
+            pemPath = dotenv.get("KALSHI_PRIVATE_KEY_PEM_PATH");       // Local
+        }
+        if (pemPath == null || pemPath.isEmpty()) {
+            throw new RuntimeException("Missing KALSHI_PRIVATE_KEY_PEM_PATH");
         }
 
         try {

@@ -34,5 +34,6 @@ build/
 .idea/
 
 # Ignore secrets
-.env
+.env*
 *.pem
+/keys/*

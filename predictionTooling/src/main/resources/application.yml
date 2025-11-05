@@ -2,15 +2,44 @@ server:
   port: 8080
 
 kalshi:
-  base-url: https://api.elections.kalshi.com/trade-api/v2
+  base-url: ${KALSHI_BASE_URL}
 
 spring:
   datasource:
-    url: jdbc:postgresql://project-arbitrage-projectarbitrage.g.aivencloud.com:21370/defaultdb?ssl=require
-    username: avnadmin
-    password: AVNS_6r03vH4erbNVwWpRR9z
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=verify-full&sslrootcert=${DB_CA_FILE}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   liquibase:
     enabled: true
     change-log: classpath:database/changelog/database.changelog-master.yaml
+
+#used to work without docker passing in the files
+#server:
+#  port: 8080
+#
+#kalshi:
+#  base-url: https://api.elections.kalshi.com/trade-api/v2
+##  base-url: ${KALSHI_BASE_URL}
+#
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://project-arbitrage-projectarbitrage.g.aivencloud.com:21370/defaultdb?ssl=require
+#    username: avnadmin
+#    password: AVNS_6r03vH4erbNVwWpRR9z
+#    driver-class-name: org.postgresql.Driver
+#
+#
+#  #spring:
+#  #  datasource:
+#  #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=verify-full&sslrootcert=${DB_CA_FILE}
+#  #    username: ${DB_USER}
+#  #    password: ${DB_PASSWORD}
+#  #    driver-class-name: org.postgresql.Driver
+#  #
+#  liquibase:
+#    enabled: true
+#    change-log: classpath:database/changelog/database.changelog-master.yaml
+#
+#

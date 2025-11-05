@@ -2,21 +2,36 @@ package com.predictionTooling.predictionTooling.config;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
 
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory(System.getProperty("user.dir"))
+            .filename(".env")  // fallback for local development
+            .ignoreIfMissing()
+            .load();
+
+    // Get Kalshi Key ID
     public static String getKeyId() {
-        String keyId = System.getenv("KALSHI_KEY_ID");
+        String keyId = System.getenv("KALSHI_KEY_ID");        // Docker
         if (keyId == null || keyId.isEmpty()) {
-            throw new RuntimeException("Missing KALSHI_KEY_ID environment variable");
+            keyId = dotenv.get("KALSHI_KEY_ID");              // Local
+        }
+        if (keyId == null || keyId.isEmpty()) {
+            throw new RuntimeException("Missing KALSHI_KEY_ID");
         }
         return keyId;
     }
 
+    // Get Kalshi Private Key
     public static String getPrivateKey() {
-        String pemPath = System.getenv("KALSHI_PRIVATE_KEY_PEM_PATH");
+        String pemPath = System.getenv("KALSHI_PRIVATE_KEY_PEM_PATH"); // Docker
         if (pemPath == null || pemPath.isEmpty()) {
-            throw new RuntimeException("Missing KALSHI_PRIVATE_KEY_PEM_PATH environment variable");
+            pemPath = dotenv.get("KALSHI_PRIVATE_KEY_PEM_PATH");       // Local
+        }
+        if (pemPath == null || pemPath.isEmpty()) {
+            throw new RuntimeException("Missing KALSHI_PRIVATE_KEY_PEM_PATH");
         }
 
         try {
@@ -26,33 +41,3 @@ public class Config {
         }
     }
 }
-
-
-//package com.predictionTooling.predictionTooling.config;
-//
-//import java.nio.file.Files;
-//import java.nio.file.Paths;
-//
-//public class Config {
-//
-//    public static String getKeyId() {
-//        String keyId = System.getenv("KALSHI_KEY_ID");
-//        if (keyId == null || keyId.isEmpty()) {
-//            throw new RuntimeException("Missing KALSHI_KEY_ID environment variable");
-//        }
-//        return keyId;
-//    }
-//
-//    public static String getPrivateKey() {
-//        String pemPath = System.getenv("KALSHI_PRIVATE_KEY_PEM_PATH");
-//        if (pemPath == null || pemPath.isEmpty()) {
-//            throw new RuntimeException("Missing KALSHI_PRIVATE_KEY_PEM_PATH environment variable");
-//        }
-//
-//        try {
-//            return Files.readString(Paths.get(pemPath));
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to read PEM file at path: " + pemPath, e);
-//        }
-//    }
-//}

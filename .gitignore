@@ -37,3 +37,6 @@ build/
 .env*
 *.pem
 /keys/*
+
+# macOS system files
+.DS_Store

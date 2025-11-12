@@ -3,19 +3,19 @@ package com.predictionTooling.predictionTooling.controller;
 import java.net.http.HttpResponse;
 import com.predictionTooling.predictionTooling.dto.BatchedOrderRequest;
 import com.predictionTooling.predictionTooling.dto.SingleOrderRequest;
-import com.predictionTooling.predictionTooling.service.KalshiService;
+import com.predictionTooling.predictionTooling.client.KalshiTradeClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/trade")
 public class TradeController {
-    private final KalshiService kalshiService = new KalshiService();
+    private final KalshiTradeClient kalshiTradeClient = new KalshiTradeClient();
 
     @PostMapping("/order")
     public ResponseEntity<String> createSingleOrder(@RequestBody SingleOrderRequest req) {
         try {
-            HttpResponse<String> resp = kalshiService.sendToKalshi(req);
+            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req);
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -26,7 +26,7 @@ public class TradeController {
     @PostMapping("/order/batched")
     public ResponseEntity<String> createBatchedOrder(@RequestBody BatchedOrderRequest req) {
         try {
-            HttpResponse<String> resp = kalshiService.sendToKalshi(req.orders());
+            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req.orders());
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +43,7 @@ public class TradeController {
             @RequestParam(defaultValue = "10") int count
     ) {
         try {
-            HttpResponse<String> resp = kalshiService.sendRandomOrders(marketTicker, side, type, count);
+            HttpResponse<String> resp = kalshiTradeClient.sendRandomOrders(marketTicker, side, type, count);
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             e.printStackTrace();

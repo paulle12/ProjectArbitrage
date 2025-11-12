@@ -1,9 +1,10 @@
-package com.predictionTooling.predictionTooling.service;
+package com.predictionTooling.predictionTooling.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionTooling.predictionTooling.auth.KalshiSigner;
 import com.predictionTooling.predictionTooling.config.Config;
 import com.predictionTooling.predictionTooling.dto.SingleOrderRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 
@@ -13,8 +14,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 
-@Service
-public class KalshiService {
+@Component
+public class KalshiTradeClient {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper json = new ObjectMapper();

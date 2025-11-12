@@ -10,7 +10,12 @@ spring:
     username: ${DB_USER:avnadmin}
     password: ${DB_PASSWORD:AVNS_6r03vH4erbNVwWpRR9z}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
 
   liquibase:
-    enabled: ${SPRING_LIQUIBASE_ENABLED:true}
+    # Leave this false if you don't want migrations to run automatically
+    # or set true manually if you want to schema updates
+    enabled: ${SPRING_LIQUIBASE_ENABLED:false}
     change-log: classpath:database/changelog/database.changelog-master.yaml

@@ -53,6 +53,8 @@ public class TradeController {
 
             // 3) Correct endpoint + signature path
             String path = "/trade-api/v2/portfolio/orders";
+            // api.elections.kalshi.com
+            // demo-api.kalshi.co
             String url = "https://demo-api.kalshi.co" + path;
 
             long ts = System.currentTimeMillis();

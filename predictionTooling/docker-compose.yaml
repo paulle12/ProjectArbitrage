@@ -1,0 +1,24 @@
+services:
+  app1:
+    build: .
+    container_name: prediction_app1
+    env_file: .env.app1
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_LIQUIBASE_ENABLED: false
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keys:/keys
+
+  app2:
+    build: .
+    container_name: prediction_app2
+    env_file: .env.app2
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_LIQUIBASE_ENABLED: false
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./keys:/keys

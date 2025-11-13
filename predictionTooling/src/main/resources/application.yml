@@ -2,15 +2,20 @@ server:
   port: 8080
 
 kalshi:
-  base-url: https://api.elections.kalshi.com/trade-api/v2
+  base-url: ${KALSHI_BASE_URL:https://api.elections.kalshi.com/trade-api/v2}
 
 spring:
   datasource:
-    url: jdbc:postgresql://project-arbitrage-projectarbitrage.g.aivencloud.com:21370/defaultdb?ssl=require
-    username: avnadmin
-    password: AVNS_6r03vH4erbNVwWpRR9z
+    url: jdbc:postgresql://${DB_HOST:project-arbitrage-projectarbitrage.g.aivencloud.com}:${DB_PORT:21370}/${DB_NAME:defaultdb}?sslmode=verify-full&sslrootcert=${DB_CA_FILE:predictionTooling/keys/ca.pem}
+    username: ${DB_USER:avnadmin}
+    password: ${DB_PASSWORD:AVNS_6r03vH4erbNVwWpRR9z}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
 
   liquibase:
-    enabled: true
+    # Leave this false if you don't want migrations to run automatically
+    # or set true manually if you want to schema updates
+    enabled: ${SPRING_LIQUIBASE_ENABLED:false}
     change-log: classpath:database/changelog/database.changelog-master.yaml

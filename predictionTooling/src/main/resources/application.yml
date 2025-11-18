@@ -18,18 +18,14 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
 
+  liquibase:
+    enabled: ${SPRING_LIQUIBASE_ENABLED:false}
+    change-log: classpath:database/changelog/database.changelog-master.yaml
+
 app:
   stream:
     name: trade-stream
     group: trade-group
-  role: ${APP_ROLE:publisher}   # publisher OR consumer
+  role: ${APP_ROLE:publisher}
   consumer:
-    workers: ${APP_CONSUMER_WORKERS:4} # number of parallel consumer threads
-
-
-
-  liquibase:
-    # Leave this false if you don't want migrations to run automatically
-    # or set true manually if you want to schema updates
-    enabled: ${SPRING_LIQUIBASE_ENABLED:false}
-    change-log: classpath:database/changelog/database.changelog-master.yaml
+    workers: ${APP_CONSUMER_WORKERS:4}

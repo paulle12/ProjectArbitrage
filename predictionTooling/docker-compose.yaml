@@ -1,11 +1,22 @@
 services:
+  redis:
+    image: redis:7
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+
   app1:
     build: .
     container_name: prediction_app1
     env_file: .env.app1
     environment:
+      SERVER_PORT: 8080
+      APP_ROLE: publisher
       SPRING_PROFILES_ACTIVE: docker
       SPRING_LIQUIBASE_ENABLED: false
+      REDIS_HOST: redis
+    depends_on:
+      - redis
     ports:
       - "8081:8080"
     volumes:
@@ -16,8 +27,13 @@ services:
     container_name: prediction_app2
     env_file: .env.app2
     environment:
+      SERVER_PORT: 8080
+      APP_ROLE: consumer
       SPRING_PROFILES_ACTIVE: docker
       SPRING_LIQUIBASE_ENABLED: false
+      REDIS_HOST: redis
+    depends_on:
+      - redis
     ports:
       - "8082:8080"
     volumes:

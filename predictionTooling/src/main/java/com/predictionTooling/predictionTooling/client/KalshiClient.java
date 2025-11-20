@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.*;
 
 @Component
+// NOT IN USE this is Arbitrage Code which wont employed for a while
 public class KalshiClient implements MarketProvider {
 
     private final RestClient client;
@@ -244,7 +245,7 @@ public class KalshiClient implements MarketProvider {
         return updatedMarkets;
     }
 
-    // ---------- Helpers ---------- KXATPMATCH-25OCT30FRIBUB-FRI
+    // ---------- Helpers ----------
 
     private static boolean isJson(ResponseEntity<?> entity) {
         var ct = entity.getHeaders().getContentType();

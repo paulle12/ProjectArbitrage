@@ -20,6 +20,7 @@ public class KalshiController {
     public KalshiController(OrderbookRepository orderbookRepository) {
         this.orderbookRepository = orderbookRepository;
     }
+
     @PostMapping("/open")
     public String openConnection(
             @RequestParam(required = true) List<String> tickers,
@@ -37,13 +38,16 @@ public class KalshiController {
             // Demo WebSocket URL (you can switch to live later)
             String wsUrl = "wss://demo-api.kalshi.co/trade-api/ws/v2";
 
+            // Prod WebSocket URL (you can switch to live later)
+            String wsUrlProd = "wss://api.elections.kalshi.com/trade-api/ws/v2";
+
             // Validate tickers input
             if (tickers == null || tickers.isEmpty()) {
                 return "Error: No tickers provided. Please include at least one, e.g. ?tickers=KXNHLGAME-25OCT29BOSNYR";
             }
 
             // Create client instance
-            client = new KalshiWsClient(wsUrl, keyId, privateKey,orderbookRepository);
+            client = new KalshiWsClient(wsUrl, keyId, privateKey, orderbookRepository);
 
             connectionFuture = client.open(tickers, trades, orderbook);
             return "Kalshi WebSocket connection started successfully for tickers: " + String.join(", ", tickers);

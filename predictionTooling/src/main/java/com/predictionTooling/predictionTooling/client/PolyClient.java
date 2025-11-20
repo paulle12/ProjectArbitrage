@@ -101,11 +101,9 @@ public class PolyClient implements MarketProvider {
                         String noAskDollars = values.get(1);
                         String americanYesOdds = "";
                         String americanNoOdds = "";
-                        Orderbook orderbook =
-                                new Orderbook(
+                        Orderbook orderbook = new Orderbook(
                                 Collections.emptyList(),
-                                Collections.emptyList()
-                            );
+                                Collections.emptyList());
 
                         result.add(new Market(
                                 marketId, // ticker

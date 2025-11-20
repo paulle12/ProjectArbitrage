@@ -13,9 +13,10 @@ public class TradeController {
     private final KalshiTradeClient kalshiTradeClient = new KalshiTradeClient();
 
     @PostMapping("/order")
-    public ResponseEntity<String> createSingleOrder(@RequestBody SingleOrderRequest req) {
+    public ResponseEntity<String> createSingleOrder(@RequestBody SingleOrderRequest req,
+            @RequestParam(defaultValue = "false") boolean prod) {
         try {
-            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req);
+            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req, prod);
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -24,9 +25,10 @@ public class TradeController {
     }
 
     @PostMapping("/order/batched")
-    public ResponseEntity<String> createBatchedOrder(@RequestBody BatchedOrderRequest req) {
+    public ResponseEntity<String> createBatchedOrder(@RequestBody BatchedOrderRequest req,
+            @RequestParam(defaultValue = "false") boolean prod) {
         try {
-            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req.orders());
+            HttpResponse<String> resp = kalshiTradeClient.sendToKalshi(req.orders(), prod);
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,15 +37,18 @@ public class TradeController {
         }
     }
 
+    // THIS IS FOR DEV ONLY NEVER SEND THIS BITCH OFF IN PROD WE SHOULD HAVE
     @PostMapping("/orders/random")
     public ResponseEntity<String> generateRandomOrders(
             @RequestParam String marketTicker,
+            @RequestParam String action,
             @RequestParam(defaultValue = "no") String side,
             @RequestParam(defaultValue = "limit") String type,
-            @RequestParam(defaultValue = "10") int count
-    ) {
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(defaultValue = "false") boolean prod) {
         try {
-            HttpResponse<String> resp = kalshiTradeClient.sendRandomOrders(marketTicker, side, type, count);
+            HttpResponse<String> resp = kalshiTradeClient.sendRandomOrders(marketTicker, action, side, type, count,
+                    prod);
             return ResponseEntity.status(resp.statusCode()).body(resp.body());
         } catch (Exception e) {
             e.printStackTrace();

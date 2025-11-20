@@ -62,7 +62,7 @@ public class StreamConsumer {
     // 2️⃣ Wait for Redis readiness
     // ------------------------------
     private void waitForRedis() throws InterruptedException {
-        String host = System.getenv().getOrDefault("SPRING_REDIS_HOST", "redis");
+        String host = System.getenv().getOrDefault("SPRING_REDIS_HOST", "localhost");
         int port = Integer.parseInt(System.getenv().getOrDefault("SPRING_REDIS_PORT", "6379"));
 
         int retries = 0;

@@ -14,8 +14,6 @@ import com.predictionTooling.predictionTooling.auth.KalshiSigner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.predictionTooling.predictionTooling.database.OrderbookRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 public class KalshiWsClient {
     private final String wsUrl; // demo or prod

@@ -1,5 +1,6 @@
 package com.predictionTooling.predictionTooling.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -10,9 +11,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Configuration
 public class RedisConfig {
 
-    // Use Docker service name and port
-    private final String redisHost = "redis";  // matches your Docker Compose service name
-    private final int redisPort = 6379;
+    @Value("${REDIS_HOST:redis}")
+    private String redisHost;
+
+    @Value("${REDIS_PORT:6379}")
+    private int redisPort;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {

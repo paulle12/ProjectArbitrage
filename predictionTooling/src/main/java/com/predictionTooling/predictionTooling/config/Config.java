@@ -2,17 +2,25 @@ package com.predictionTooling.predictionTooling.config;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
+    private static final Dotenv dotenv;
 
-    private static final Dotenv dotenv = Dotenv.configure()
-            .directory(System.getProperty("user.dir"))
-            .filename(".env")  // fallback for local development
-            .ignoreIfMissing()
-            .load();
+    static {
+        Dotenv temp = null;
+        try {
+            temp = Dotenv.configure()
+                    .ignoreIfMissing()
+                    .ignoreIfMalformed()
+                    .load();
+        } catch (Exception ignored) {
+            // Never crash in Docker
+        }
+        dotenv = temp;
+    }
 
-    // Get Kalshi Key ID
     public static String getKeyId() {
         String keyId = System.getenv("KALSHI_KEY_ID");        // Docker
         if (keyId == null || keyId.isEmpty()) {
@@ -40,4 +48,21 @@ public class Config {
             throw new RuntimeException("Failed to read PEM file at path: " + pemPath, e);
         }
     }
+
+    public static String getScoreBoardKey() {
+        // Docker / Compose
+        String apiKey = System.getenv("API_SPORTS_KEY");
+
+        // Local dev (.env)
+        if ((apiKey == null || apiKey.isBlank()) && dotenv != null) {
+            apiKey = dotenv.get("API_SPORTS_KEY");
+        }
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new RuntimeException("Missing API_SPORTS_KEY");
+        }
+
+        return apiKey;
+    }
+
 }

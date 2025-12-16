@@ -18,7 +18,6 @@ import com.predictionTooling.predictionTooling.service.MarketIdMatchingService;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.*;
 
 @Component

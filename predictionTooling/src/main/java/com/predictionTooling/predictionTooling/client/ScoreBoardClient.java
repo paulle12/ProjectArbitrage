@@ -4,7 +4,6 @@ import com.predictionTooling.predictionTooling.config.Config;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 
@@ -41,9 +40,17 @@ public class ScoreBoardClient {
 
     public Object getNHLGames() {
         LocalDate date = LocalDate.now(ZoneOffset.UTC);
+
+//        ZoneId est = ZoneId.of("America/New_York");
+//        LocalDate utcDate =
+//                ZonedDateTime.of(2025, 12, 16, 19, 0, 0, 0, est)
+//                        .withZoneSameInstant(ZoneOffset.UTC)
+//                        .toLocalDate();
+
         return nhlClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/games")
+//                        .queryParam("date", utcDate)
                         .queryParam("date", date)
                         .build()
                 )

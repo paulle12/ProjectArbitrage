@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.predictionTooling.predictionTooling.client.ScoreBoardClient;
+import com.predictionTooling.predictionTooling.redis.NHLStreamPublisher;
+import com.predictionTooling.predictionTooling.redis.NFLStreamPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/score")
@@ -16,10 +19,14 @@ public class ScoreBoardController {
 
     private final ScoreBoardClient scoreBoardClient;
     private final ObjectMapper objectMapper;
+    private final NFLStreamPublisher NFLStreamPublisher;
+    private final NHLStreamPublisher nhlStreamPublisher;
 
-    public ScoreBoardController(ScoreBoardClient scoreBoardClient, ObjectMapper objectMapper) {
+    public ScoreBoardController(ScoreBoardClient scoreBoardClient, ObjectMapper objectMapper, NFLStreamPublisher NFLStreamPublisher, NHLStreamPublisher nhlStreamPublisher) {
         this.scoreBoardClient = scoreBoardClient;
         this.objectMapper = objectMapper;
+        this.NFLStreamPublisher = NFLStreamPublisher;
+        this.nhlStreamPublisher = nhlStreamPublisher;
     }
 
     @GetMapping("/nfl/games")
@@ -46,34 +53,26 @@ public class ScoreBoardController {
     }
 
     @GetMapping("/nfl/games/poll")
-    public ResponseEntity<List<JsonNode>> pollNFLScoreBoard(@RequestParam String teamName // team name to filter
+    public ResponseEntity<JsonNode> pollNFLScoreBoard(@RequestParam String teamName,@RequestParam int minLead
     ) {
-        // Get the raw object
-        Object api = scoreBoardClient.getNFLGames();
+        // Start the publisher only when this endpoint is called
+        NFLStreamPublisher.startPublishing(teamName, minLead);
 
-        // Convert to JsonNode
-        JsonNode rootNode = objectMapper.valueToTree(api);
+        // Return the latest cached game if available
+        return NFLStreamPublisher.getLatestGame()
+                .map(ResponseEntity::ok)
+                //todo fix response
+                .orElseGet(() -> ResponseEntity.accepted().build());
+    }
 
-        // Get the response array
-        ArrayNode responseArray = (ArrayNode) rootNode.path("response");
 
-        List<JsonNode> filteredGames = new ArrayList<>();
+    @GetMapping("/nfl/latest-game")
+    public ResponseEntity<JsonNode> getLatestNFLGame() {
+        return NFLStreamPublisher.getLatestGame()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.accepted().build());
+    }
 
-        for (JsonNode item : responseArray) {
-            JsonNode leagueNode = item.path("league");
-            if (leagueNode.path("id").asInt(-1) != 1) continue; // skip non-NFL
-
-            JsonNode teamsNode = item.path("teams");
-            String homeName = teamsNode.path("home").path("name").asText("");
-            String awayName = teamsNode.path("away").path("name").asText("");
-
-            if (homeName.equalsIgnoreCase(teamName) || awayName.equalsIgnoreCase(teamName)) {
-                filteredGames.add(item);
-            }
-        }
-
-        return ResponseEntity.ok(filteredGames);
-}
 
     @GetMapping("/nhl/games")
     public ResponseEntity<List<JsonNode>> getNHLScoreBoard() {
@@ -86,45 +85,28 @@ public class ScoreBoardController {
         // Get the response array
         ArrayNode responseArray = (ArrayNode) rootNode.path("response");
 
-        List<JsonNode> nflGames = new ArrayList<>();
+        List<JsonNode> nhlGames = new ArrayList<>();
 
         for (JsonNode item : responseArray) {
             JsonNode leagueNode = item.path("league");
             if (leagueNode.path("id").asInt(-1) == 57) { // filter league.id == 57
-                nflGames.add(item);
+                nhlGames.add(item);
             }
         }
 
-        return ResponseEntity.ok(nflGames);
+        return ResponseEntity.ok(nhlGames);
     }
 
     @GetMapping("/nhl/games/poll")
-    public ResponseEntity<List<JsonNode>> pollNHLScoreBoard(@RequestParam String teamName // team name to filter
+    public ResponseEntity<JsonNode> pollNHLScoreBoard(@RequestParam String teamName , @RequestParam int minLead
     ) {
-        // Get the raw object
-        Object api = scoreBoardClient.getNFLGames();
+        // Start the publisher only when this endpoint is called
+        nhlStreamPublisher.startPublishing(teamName, minLead);
 
-        // Convert to JsonNode
-        JsonNode rootNode = objectMapper.valueToTree(api);
-
-        // Get the response array
-        ArrayNode responseArray = (ArrayNode) rootNode.path("response");
-
-        List<JsonNode> filteredGames = new ArrayList<>();
-
-        for (JsonNode item : responseArray) {
-            JsonNode leagueNode = item.path("league");
-            if (leagueNode.path("id").asInt(-1) != 57) continue; // skip non-NHL
-
-            JsonNode teamsNode = item.path("teams");
-            String homeName = teamsNode.path("home").path("name").asText("");
-            String awayName = teamsNode.path("away").path("name").asText("");
-
-            if (homeName.equalsIgnoreCase(teamName) || awayName.equalsIgnoreCase(teamName)) {
-                filteredGames.add(item);
-            }
-        }
-
-        return ResponseEntity.ok(filteredGames);
+        // Return the latest cached game if available
+        return NFLStreamPublisher.getLatestGame()
+                .map(ResponseEntity::ok)
+                //todo fix response
+                .orElseGet(() -> ResponseEntity.accepted().build());
     }
 }

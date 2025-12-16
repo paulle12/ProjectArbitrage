@@ -14,11 +14,11 @@ public class RoleInitializer {
     private String role;
 
     // Use @Lazy so Spring does NOT initialize both beans at startup.
-    private final StreamPublisher publisher;
+    private final NFLStreamPublisher publisher;
     private final StreamConsumer consumer;
 
     @Autowired
-    public RoleInitializer(@Lazy StreamPublisher publisher,
+    public RoleInitializer(@Lazy NFLStreamPublisher publisher,
                            @Lazy StreamConsumer consumer) {
         this.publisher = publisher;
         this.consumer = consumer;
@@ -29,7 +29,6 @@ public class RoleInitializer {
 
         if ("publisher".equalsIgnoreCase(role)) {
             System.out.println("🚀 Starting in PUBLISHER mode");
-            publisher.startPublishing();  // Non-blocking if implemented correctly
         }
 
         else if ("consumer".equalsIgnoreCase(role)) {

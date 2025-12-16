@@ -48,10 +48,12 @@ public class KalshiClient implements MarketProvider {
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toEntity(String.class);
-
-            System.out.println("[Kalshi.series] status=" + entity.getStatusCode()
-                    + " contentType=" + entity.getHeaders().getContentType());
-            System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(), 500));
+            // going to leave these here for now we should we replace these with possible
+            // monitoring code
+            // System.out.println("[Kalshi.series] status=" + entity.getStatusCode()
+            // + " contentType=" + entity.getHeaders().getContentType());
+            // System.out.println("[Kalshi.series] raw body=" + snippet(entity.getBody(),
+            // 500));
 
             String raw = entity.getBody();
             if (raw != null && !raw.isBlank() && isJson(entity)) {
@@ -89,9 +91,12 @@ public class KalshiClient implements MarketProvider {
                         .retrieve()
                         .toEntity(String.class);
 
-                System.out.println("[Kalshi.markets] status=" + entity.getStatusCode()
-                        + " contentType=" + entity.getHeaders().getContentType());
-                System.out.println("[Kalshi.markets] raw body=" + snippet(entity.getBody(), 500));
+                // going to leave these here for now we should we replace these with possible
+                // monitoring code
+                // System.out.println("[Kalshi.markets] status=" + entity.getStatusCode()
+                // + " contentType=" + entity.getHeaders().getContentType());
+                // System.out.println("[Kalshi.markets] raw body=" + snippet(entity.getBody(),
+                // 500));
 
                 if (isJson(entity) && entity.getBody() != null) {
                     MarketsResponse mr = mapper.readValue(entity.getBody(), MarketsResponse.class);

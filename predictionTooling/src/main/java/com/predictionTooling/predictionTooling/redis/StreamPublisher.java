@@ -22,7 +22,7 @@ public class StreamPublisher {
     @Value("${app.stream.name}")
     private String streamName;
 
-    @Value("${app.publisher.interval:5}")
+    @Value("${app.publisher.interval:60}")
     private int publishIntervalSeconds;
 
     private ScheduledExecutorService scheduler;
@@ -69,16 +69,24 @@ public class StreamPublisher {
     // 2️⃣ Message publishing logic
     // ---------------------------------------------------------
     private void publishTradeSignal() {
-        TradeSignal tradeSignal =
-                new TradeSignal("BUY", Math.round(Math.random() * 1000) / 10.0);
-
         Map<String, String> msg = new HashMap<>();
-        msg.put("action", tradeSignal.action());
-        msg.put("price", String.valueOf(tradeSignal.price()));
 
+        // “type” (route key)
+        msg.put("type", "LateGameStrategy");
+
+        // game state fields
+        msg.put("league", "NFL");
+        msg.put("homeTeam", "Dallas Cowboys");
+        msg.put("awayTeam", "Minnesota Vikings");
+        msg.put("homeScore", "24");
+        msg.put("awayScore", "23");
+        msg.put("quarter", "Q4");
+        msg.put("time", String.valueOf(System.currentTimeMillis())); // or your fixed test timestamp
+
+        // Publish to stream
         template.opsForStream().add(streamName, msg);
 
-        System.out.println("📤 Published trade signal: " + msg);
+        System.out.println("📤 Published to Redis: " + msg);
     }
 
     // ---------------------------------------------------------
@@ -94,7 +102,8 @@ public class StreamPublisher {
             scheduler.shutdown();
             try {
                 scheduler.awaitTermination(3, TimeUnit.SECONDS);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 }

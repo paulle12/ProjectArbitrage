@@ -15,6 +15,7 @@ import com.predictionTooling.predictionTooling.dto.LateGameScalpingRequest;
 import com.predictionTooling.predictionTooling.service.LateGameScalpingService;
 import com.predictionTooling.predictionTooling.service.MarketIdMatchingService;
 
+import java.util.Optional;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -187,11 +188,16 @@ public class StreamConsumer {
         // int homeScore = Integer.parseInt((String) fields.get("homeScore"));
         // int awayScore = Integer.parseInt((String) fields.get("awayScore"));
         // String yesTeam = homeScore > awayScore ? homeTeam : awayTeam;
+        // boolean isNhl = league.equals("NHL") ? true : false;
+        // System.out.println(isNhl);
         boolean prod = false;
 
         // TODO: replace with MarketIdMatchingService lookup
-        // Optional<String> marketIdMatch =
-        // marketIdMatchingService.findWinningNflMarket(homeTeam, awayTeam, yesTeam);
+        // Optional<String> marketIdMatch = isNhl
+        // ? marketIdMatchingService.findWinningNhlMarket(homeTeam, awayTeam, yesTeam,
+        // isNhl)
+        // : marketIdMatchingService.findWinningNflMarket(homeTeam, awayTeam, yesTeam,
+        // isNhl);
         // String marketId = marketIdMatch.orElseThrow(() -> new IllegalStateException(
         // "No unambiguous marketId for league=" + league
         // + ", matchup=" + awayTeam + " at " + homeTeam

@@ -41,7 +41,8 @@ public class NHLStreamPublisher {
     // Start polling for a specific team
     // -------------------------------
     public void startPublishing(String teamName, int minLead) {
-        if (running) return;
+        if (running)
+            return;
 
         running = true;
         scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -57,7 +58,7 @@ public class NHLStreamPublisher {
 
     private void pollAndScheduleNext(String teamName, int minLead) {
         try {
-            //todo update to keep poling but stop after the first wining instance
+            // todo update to keep poling but stop after the first wining instance
             poll(teamName, minLead);
         } catch (Exception e) {
             System.err.println("❌ Polling error: " + e.getMessage());
@@ -71,23 +72,23 @@ public class NHLStreamPublisher {
     }
 
     private void poll(String teamName, int minLead) {
+        System.out.println("i am polling");
         Object api = scoreBoardClient.getNHLGames();
         JsonNode rootNode = objectMapper.valueToTree(api);
         JsonNode gamesArray = rootNode.isArray() ? rootNode : rootNode.path("response");
-
+        // System.out.println(gamesArray);
         Optional<JsonNode> gameOpt = StreamSupport.stream(gamesArray.spliterator(), false)
                 .filter(g -> {
                     String home = safeText(g.path("teams").path("home").path("name"), "");
                     String away = safeText(g.path("teams").path("away").path("name"), "");
-                    int homeScore = safeScore(g.path("scores").path("home").path("total"));
-                    int awayScore = safeScore(g.path("scores").path("away").path("total"));
-
+                    int homeScore = safeScore(g.path("scores").path("home"));
+                    int awayScore = safeScore(g.path("scores").path("away"));
                     boolean teamMatch = home.equalsIgnoreCase(teamName) || away.equalsIgnoreCase(teamName);
-                    //TODO fix this add time based check
+                    // TODO fix this add time based check
                     boolean leadMatch = Math.abs(homeScore - awayScore) >= minLead;
 
                     return teamMatch && leadMatch;
-//                    return teamMatch;
+                    // return teamMatch;
                 })
                 .findFirst();
 
@@ -109,12 +110,12 @@ public class NHLStreamPublisher {
         node.put("homeTeam", safeText(gameNode.path("teams").path("home").path("name"), "Unknown"));
         node.put("awayTeam", safeText(gameNode.path("teams").path("away").path("name"), "Unknown"));
 
-        int homeScore = safeScore(gameNode.path("scores").path("home").path("total"));
-        int awayScore = safeScore(gameNode.path("scores").path("away").path("total"));
+        int homeScore = safeScore(gameNode.path("scores").path("home"));
+        int awayScore = safeScore(gameNode.path("scores").path("away"));
         node.put("homeScore", homeScore);
         node.put("awayScore", awayScore);
 
-        node.put("period", safeText(gameNode.path("game").path("status").path("short"), "first"));
+        node.put("period", safeText(gameNode.path("status").path("short"), "first"));
         node.put("time", System.currentTimeMillis());
         return node;
     }
@@ -122,16 +123,18 @@ public class NHLStreamPublisher {
     // -------------------------------
     // Conditional publish to Redis
     // -------------------------------
-    //todo update to keep poling but stop after the first wining instance
+    // todo update to keep poling but stop after the first wining instance
     private void conditionalPublish(JsonNode minimalGame) {
         String period = minimalGame.path("period").asText("first");
-
-        //todo only do period 3 and also check the time to make sure its within the last 10 min
-        if ("first".equalsIgnoreCase(period)
-                ||"second".equalsIgnoreCase(period)
-                || "third".equalsIgnoreCase(period)
-                || "FT".equalsIgnoreCase(period))
-        {
+        System.out.println(period);
+        // todo only do period 3 and also check the time to make sure its within the
+        // last 10 min
+        if ("P1".equalsIgnoreCase(period)
+                || "P2".equalsIgnoreCase(period)
+                || "P3".equalsIgnoreCase(period)
+                || "FT".equalsIgnoreCase(period)
+                || "OT".equalsIgnoreCase(period)
+                || "BT".equalsIgnoreCase(period)) {
 
             Map<String, String> redisMap = new HashMap<>();
             minimalGame.fields().forEachRemaining(entry -> {
@@ -150,10 +153,10 @@ public class NHLStreamPublisher {
     // -------------------------------
     private void adjustInterval(String period) {
         currentIntervalSeconds = switch (period.toUpperCase()) {
-            //todo adjust poll interval
-            case "first" -> 3200;
-            case "second" -> 320;
-            case "third" -> 60;
+            // todo adjust poll interval
+            case "first" -> 120;
+            case "second" -> 120;
+            case "third" -> 120;
             default -> 3600;
         };
         System.out.println("⏱ Next poll in " + currentIntervalSeconds + "s for period " + period);
@@ -163,8 +166,10 @@ public class NHLStreamPublisher {
     // Safe parsing helpers
     // -------------------------------
     private int safeScore(JsonNode node) {
-        if (node == null || node.isNull()) return 0;
-        if (node.isInt()) return node.asInt();
+        if (node == null || node.isNull())
+            return 0;
+        if (node.isInt())
+            return node.asInt();
         if (node.isTextual()) {
             try {
                 return Integer.parseInt(node.asText());
@@ -175,9 +180,11 @@ public class NHLStreamPublisher {
     }
 
     private String safeText(JsonNode node, String defaultVal) {
-        if (node == null || node.isNull()) return defaultVal;
+        if (node == null || node.isNull())
+            return defaultVal;
         String text = node.asText();
-        if (text == null || text.equalsIgnoreCase("null") || text.isEmpty()) return defaultVal;
+        if (text == null || text.equalsIgnoreCase("null") || text.isEmpty())
+            return defaultVal;
         return text;
     }
 
@@ -205,4 +212,3 @@ public class NHLStreamPublisher {
         }
     }
 }
-

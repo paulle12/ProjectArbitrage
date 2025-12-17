@@ -176,34 +176,20 @@ public class MarketIdMatchingService {
     public Optional<String> findYesMarketTickerForTeam(List<KalshiEvent> events,
             String teamA,
             String teamB,
-            String yesTeam) {
+            String yesTeam,
+            boolean isNhl) {
         Optional<KalshiEvent> maybeEvent = findEventByTeams(events, teamA, teamB);
+        // System.out.println(maybeEvent);
         if (maybeEvent.isEmpty()) {
             return Optional.empty();
         }
 
         KalshiEvent event = maybeEvent.get();
 
-        // Keys for the YES team
-        String yesCity = cityKey(yesTeam); // e.g. "los angeles"
-        String yesCityWithInitial = cityPlusInitialKey(yesTeam); // e.g. "los angeles c"
-
-        String yesCityNorm = yesCity; // already normalized
-        String yesCityInitNorm = yesCityWithInitial;
-
-        List<KalshiMarket> matchingMarkets = event.markets().stream()
-                .filter(m -> "active".equalsIgnoreCase(m.status()))
-                .filter(m -> {
-                    String yesTitleNorm = norm(m.yesSubTitle()); // e.g. "los angeles c"
-                    // Prefer exact city+initial match if available
-                    if (!yesCityInitNorm.equals(yesCityNorm) && yesTitleNorm.contains(yesCityInitNorm)) {
-                        return true;
-                    }
-                    // Fallback to just city
-                    return yesTitleNorm.contains(yesCityNorm);
-                })
-                .toList();
-
+        List<KalshiMarket> matchingMarkets = isNhl
+                ? findMatchingNhlMarkets(event, yesTeam)
+                : findMatchingNflMarkets(event, yesTeam);
+        // System.out.println(matchingMarkets);
         if (matchingMarkets.size() == 1) {
             return Optional.of(matchingMarkets.get(0).ticker());
         }
@@ -212,13 +198,84 @@ public class MarketIdMatchingService {
         return Optional.empty();
     }
 
+    private List<KalshiMarket> findMatchingNflMarkets(KalshiEvent event, String yesTeam) {
+        String yesCity = cityKey(yesTeam); // e.g. "los angeles"
+        String yesCityWithInitial = cityPlusInitialKey(yesTeam); // e.g. "los angeles c"
+
+        String yesCityNorm = yesCity;
+        String yesCityInitNorm = yesCityWithInitial;
+
+        return event.markets().stream()
+                .filter(m -> "active".equalsIgnoreCase(m.status()))
+                .filter(m -> {
+                    String yesTitleNorm = norm(m.yesSubTitle()); // e.g. "los angeles c"
+                    if (!yesCityInitNorm.equals(yesCityNorm) && yesTitleNorm.contains(yesCityInitNorm)) {
+                        return true;
+                    }
+                    return yesTitleNorm.contains(yesCityNorm);
+                })
+                .toList();
+    }
+
+    private List<KalshiMarket> findMatchingNhlMarkets(KalshiEvent event, String yesTeam) {
+        String teamNorm = norm(yesTeam); // "boston bruins"
+
+        String[] parts = teamNorm.split(" ");
+        String mascot = parts.length >= 2 ? parts[parts.length - 1] : teamNorm; // "bruins"
+
+        String cityNorm = cityKey(yesTeam); // "boston"
+        String city3 = cityNorm.length() >= 3 ? cityNorm.substring(0, 3) : cityNorm; // "bos"
+
+        return event.markets().stream()
+                .filter(m -> "active".equalsIgnoreCase(m.status()))
+                .filter(m -> {
+                    // Some NHL payloads repeat team on both yes/no subtitle; check both to be safe.
+                    String yesSub = m.yesSubTitle() == null ? "" : m.yesSubTitle();
+                    String noSub = m.noSubTitle() == null ? "" : m.noSubTitle();
+
+                    return matchesNhlSubtitle(teamNorm, cityNorm, city3, mascot, yesSub)
+                            || matchesNhlSubtitle(teamNorm, cityNorm, city3, mascot, noSub);
+                })
+                .toList();
+    }
+
+    private static boolean matchesNhlSubtitle(
+            String teamNorm,
+            String cityNorm,
+            String city3,
+            String mascot,
+            String subtitleRaw) {
+        String subNorm = norm(subtitleRaw); // e.g. "bos bruins"
+
+        // Best case: subtitle contains full "boston bruins"
+        if (subNorm.contains(teamNorm))
+            return true;
+
+        // Otherwise: require mascot + city signal (either full city or first 3 letters)
+        boolean mascotMatch = !mascot.isBlank() && subNorm.contains(mascot);
+        boolean cityMatch = (!cityNorm.isBlank() && subNorm.contains(cityNorm))
+                || (!city3.isBlank() && subNorm.contains(city3));
+
+        return mascotMatch && cityMatch;
+    }
+
     public Optional<String> findWinningNflMarket(String teamA,
             String teamB,
-            String yesTeam) throws IOException, InterruptedException {
+            String yesTeam, boolean isNhl) throws IOException, InterruptedException {
         long now = Instant.now().getEpochSecond();
         String json = KalshiSportsClient.getNflEvents(now);
         List<KalshiEvent> events = parseEvents(json);
-        return findYesMarketTickerForTeam(events, teamA, teamB, yesTeam);
+        return findYesMarketTickerForTeam(events, teamA, teamB, yesTeam, isNhl);
+    }
+
+    public Optional<String> findWinningNhlMarket(String teamA,
+            String teamB,
+            String yesTeam, boolean isNhl) throws IOException, InterruptedException {
+        long now = Instant.now().getEpochSecond();
+        String json = KalshiSportsClient.getNhlEvents(now);
+
+        List<KalshiEvent> events = parseEvents(json);
+        return findYesMarketTickerForTeam(events, teamA, teamB, yesTeam, isNhl);
     }
 
     public static void main(String[] args) throws Exception {
@@ -234,27 +291,28 @@ public class MarketIdMatchingService {
         // // 2. Parse into objects
         // List<KalshiEvent> events = svc.parseEvents(json);
         // System.out.println("Parsed events count = " + events.size());
-
+        boolean isNhl = true;
         // 3. Example lookup:
-        String teamA = "Atlanta Falcons";
-        String teamB = "Tampa Bay Buccaneers";
-        String yesTeam = "Atlanta Falcons";
+        // String teamA = "Atlanta Falcons";
+        // String teamB = "Tampa Bay Buccaneers";
+        // String yesTeam = "Atlanta Falcons";
 
-        Optional<String> marketId = svc.findWinningNflMarket(teamA, teamB, yesTeam);
+        // Optional<String> marketId = svc.findWinningNflMarket(teamA, teamB, yesTeam,
+        // false);
 
-        if (marketId.isPresent()) {
-            System.out.println("MATCH FOUND! NFL Market ID = " + marketId.get());
-        } else {
-            System.out.println("No unambiguous match found.");
-        }
+        // if (marketId.isPresent()) {
+        // System.out.println("MATCH FOUND! NFL Market ID = " + marketId.get());
+        // } else {
+        // System.out.println("No unambiguous match found.");
+        // }
 
-        String NHLteamA = "Boston Bruins";
-        String NHLteamB = "Florida Panthers";
-        String NHLyesTeam = "Boston Bruins";
+        String NHLteamA = "Edmonton Oilers";
+        String NHLteamB = "Pittsburgh Penguins";
+        String NHLyesTeam = "Edmonton Oilers";
 
-        Optional<String> NHLmarketId = svc.findWinningNflMarket(NHLteamA, NHLteamB, NHLyesTeam);
+        Optional<String> NHLmarketId = svc.findWinningNhlMarket(NHLteamA, NHLteamB, NHLyesTeam, isNhl);
 
-        if (marketId.isPresent()) {
+        if (NHLmarketId.isPresent()) {
             System.out.println("MATCH FOUND! NFL Market ID = " + NHLmarketId.get());
         } else {
             System.out.println("No unambiguous match found.");

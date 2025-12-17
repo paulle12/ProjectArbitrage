@@ -45,7 +45,7 @@ public class LateGameScalpingService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to send BUY order to Kalshi", e);
         }
-
+        System.out.println("buy purchase happens");
         // --- 2) Wait until the BUY actually fills ---
         // THERE IS AN INHERENT BUG THAT CAN HAPPEN
         // IF PREVIOUSLY OWN CONTRACTS EXIST MORE THAN THE SIZE TO TRADE TECHNICALLY IT
@@ -70,7 +70,7 @@ public class LateGameScalpingService {
             throw new RuntimeException(
                     "BUY order did not fully fill within timeout; aborting SELL leg.");
         }
-
+        System.out.println("filled purchase order ready to sell");
         // --- 2) Place the SELL leg (exit) ---
         try {
             SingleOrderRequest sellOrder = new SingleOrderRequest(
@@ -85,6 +85,7 @@ public class LateGameScalpingService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to send SELL order to Kalshi", e);
         }
+        System.out.println("sold order");
     }
 
     private void validateRequest(LateGameScalpingRequest req) {

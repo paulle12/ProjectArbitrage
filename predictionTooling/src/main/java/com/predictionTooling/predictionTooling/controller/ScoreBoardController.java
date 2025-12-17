@@ -22,7 +22,8 @@ public class ScoreBoardController {
     private final NFLStreamPublisher NFLStreamPublisher;
     private final NHLStreamPublisher nhlStreamPublisher;
 
-    public ScoreBoardController(ScoreBoardClient scoreBoardClient, ObjectMapper objectMapper, NFLStreamPublisher NFLStreamPublisher, NHLStreamPublisher nhlStreamPublisher) {
+    public ScoreBoardController(ScoreBoardClient scoreBoardClient, ObjectMapper objectMapper,
+            NFLStreamPublisher NFLStreamPublisher, NHLStreamPublisher nhlStreamPublisher) {
         this.scoreBoardClient = scoreBoardClient;
         this.objectMapper = objectMapper;
         this.NFLStreamPublisher = NFLStreamPublisher;
@@ -53,18 +54,16 @@ public class ScoreBoardController {
     }
 
     @GetMapping("/nfl/games/poll")
-    public ResponseEntity<JsonNode> pollNFLScoreBoard(@RequestParam String teamName,@RequestParam int minLead
-    ) {
+    public ResponseEntity<JsonNode> pollNFLScoreBoard(@RequestParam String teamName, @RequestParam int minLead) {
         // Start the publisher only when this endpoint is called
         NFLStreamPublisher.startPublishing(teamName, minLead);
 
         // Return the latest cached game if available
         return NFLStreamPublisher.getLatestGame()
                 .map(ResponseEntity::ok)
-                //todo fix response
+                // todo fix response
                 .orElseGet(() -> ResponseEntity.accepted().build());
     }
-
 
     @GetMapping("/nfl/latest-game")
     public ResponseEntity<JsonNode> getLatestNFLGame() {
@@ -72,7 +71,6 @@ public class ScoreBoardController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.accepted().build());
     }
-
 
     @GetMapping("/nhl/games")
     public ResponseEntity<List<JsonNode>> getNHLScoreBoard() {
@@ -98,15 +96,15 @@ public class ScoreBoardController {
     }
 
     @GetMapping("/nhl/games/poll")
-    public ResponseEntity<JsonNode> pollNHLScoreBoard(@RequestParam String teamName , @RequestParam int minLead
-    ) {
+    public ResponseEntity<JsonNode> pollNHLScoreBoard(@RequestParam String teamName, @RequestParam int minLead) {
+        System.out.println("i am publishing:");
         // Start the publisher only when this endpoint is called
         nhlStreamPublisher.startPublishing(teamName, minLead);
 
         // Return the latest cached game if available
-        return NFLStreamPublisher.getLatestGame()
+        return nhlStreamPublisher.getLatestGame()
                 .map(ResponseEntity::ok)
-                //todo fix response
+                // todo fix response
                 .orElseGet(() -> ResponseEntity.accepted().build());
     }
 }
